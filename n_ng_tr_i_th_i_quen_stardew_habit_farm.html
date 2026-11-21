@@ -1,0 +1,3409 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nông Trại Thói Quen — Stardew Habit Farm</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts supporting full Vietnamese diacritics + Pixel Retro accents -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Press+Start+2P&family=Quicksand:wght@500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --grass-bg: #d8f3dc;
+      --grass-dot: #b7e4c7;
+      --wood-dark: #7f4f24;
+      --wood-border: #8c583a;
+      --wood-mid: #d4a373;
+      --wood-light: #e6ccb2;
+      --parchment: #faedcd;
+      --cream-card: #fffdf7;
+      --soil-dry: #c89f7c;
+      --soil-dry-border: #9c6644;
+      --soil-wet: #8d5b3c;
+      --soil-wet-border: #582f0e;
+      --pastel-pink: #ffafcc;
+      --pastel-yellow: #ffd166;
+      --pastel-lavender: #cdb4db;
+      --pastel-mint: #95d5b2;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Quicksand', 'Nunito', sans-serif;
+      background-color: var(--grass-bg);
+      background-image:
+        radial-gradient(var(--grass-dot) 2px, transparent 2px),
+        radial-gradient(#c7eccb 2px, var(--grass-bg) 2px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+      color: #4a3525;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .font-heading {
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .font-pixel {
+      font-family: 'Silkscreen', 'VT323', monospace;
+    }
+
+    .font-vt {
+      font-family: 'VT323', monospace;
+    }
+
+    /* Stardew-inspired Wooden Panel & Dialog Framing */
+    .wood-panel {
+      background: linear-gradient(180deg, #f3d5b5 0%, #e6ccb2 100%);
+      border: 4px solid var(--wood-border);
+      box-shadow:
+        inset 0 0 0 3px #faedcd,
+        inset 0 -4px 0 0 #cfa985,
+        0 6px 0 rgba(111, 69, 43, 0.22);
+      border-radius: 18px;
+    }
+
+    .wood-sign {
+      background: linear-gradient(180deg, #deb887 0%, #c89666 100%);
+      border: 4px solid #6f4518;
+      box-shadow:
+        inset 0 2px 0 #f5deb3,
+        inset 0 -3px 0 #a47148,
+        0 5px 0 rgba(88, 47, 14, 0.25);
+      border-radius: 16px;
+    }
+
+    .cream-box {
+      background-color: var(--cream-card);
+      border: 3px solid #d4a373;
+      box-shadow: inset 0 2px 0 #ffffff, 0 3px 0 rgba(140, 88, 58, 0.12);
+      border-radius: 14px;
+    }
+
+    /* Farm Soil Plot Styling */
+    .farm-plot {
+      background: linear-gradient(180deg, #fffdf7 0%, #fdf6e7 100%);
+      border: 4px solid var(--wood-border);
+      box-shadow:
+        inset 0 0 0 3px #eddcd2,
+        0 6px 0 rgba(111, 69, 43, 0.2);
+      border-radius: 20px;
+      transition: transform 0.16s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.16s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .farm-plot:hover:not(.plot-dead) {
+      transform: translateY(-3px);
+      box-shadow:
+        inset 0 0 0 3px #faedcd,
+        0 9px 0 rgba(111, 69, 43, 0.24);
+    }
+
+    .farm-plot:active:not(.plot-dead) {
+      transform: translateY(2px) scale(0.985);
+      box-shadow:
+        inset 0 0 0 3px #faedcd,
+        0 3px 0 rgba(111, 69, 43, 0.2);
+    }
+
+    .soil-patch {
+      background-color: var(--soil-dry);
+      background-image:
+        radial-gradient(#b08463 1.5px, transparent 1.5px),
+        radial-gradient(#ddb892 1.5px, transparent 1.5px);
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+      border: 3px solid var(--soil-dry-border);
+      box-shadow: inset 0 4px 0 rgba(0, 0, 0, 0.12);
+      border-radius: 16px;
+      transition: background-color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .soil-patch.watered {
+      background-color: var(--soil-wet);
+      background-image:
+        radial-gradient(#6f4518 1.5px, transparent 1.5px),
+        radial-gradient(#a47148 1.5px, transparent 1.5px);
+      border-color: var(--soil-wet-border);
+    }
+
+    .soil-patch.dead-soil {
+      background-color: #a89f96;
+      background-image: radial-gradient(#857c73 1.5px, transparent 1.5px);
+      border-color: #6e655d;
+    }
+
+    /* Tactile Stardew Buttons */
+    .btn-wood {
+      background: linear-gradient(180deg, #ffdf9e 0%, #f4c06f 100%);
+      border: 3px solid #8c583a;
+      box-shadow: inset 0 2px 0 #fff3d1, 0 3px 0 #7f4f24;
+      color: #582f0e;
+      font-weight: 800;
+      border-radius: 12px;
+      transition: all 0.12s ease;
+    }
+
+    .btn-wood:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+
+    .btn-wood:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 0 #fff3d1, 0 1px 0 #7f4f24;
+    }
+
+    .btn-mint {
+      background: linear-gradient(180deg, #b7e4c7 0%, #84d2a4 100%);
+      border: 3px solid #3a7d58;
+      box-shadow: inset 0 2px 0 #e8f8ee, 0 3px 0 #2d6a4f;
+      color: #1b4332;
+      font-weight: 800;
+      border-radius: 12px;
+      transition: all 0.12s ease;
+    }
+
+    .btn-mint:hover {
+      filter: brightness(1.04);
+      transform: translateY(-1px);
+    }
+
+    .btn-mint:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 0 #e8f8ee, 0 1px 0 #2d6a4f;
+    }
+
+    .btn-pink {
+      background: linear-gradient(180deg, #ffc8dd 0%, #ff9ebb 100%);
+      border: 3px solid #9e4767;
+      box-shadow: inset 0 2px 0 #ffe5ef, 0 3px 0 #803551;
+      color: #591c34;
+      font-weight: 800;
+      border-radius: 12px;
+      transition: all 0.12s ease;
+    }
+
+    .btn-pink:active {
+      transform: translateY(2px);
+      box-shadow: inset 0 2px 0 #ffe5ef, 0 1px 0 #803551;
+    }
+
+    /* Animations */
+    @keyframes floatCloud {
+      0% { transform: translateX(-10%); }
+      50% { transform: translateX(12%); }
+      100% { transform: translateX(-10%); }
+    }
+
+    .cloud-drift-1 {
+      animation: floatCloud 18s ease-in-out infinite;
+    }
+
+    .cloud-drift-2 {
+      animation: floatCloud 25s ease-in-out infinite reverse;
+    }
+
+    @keyframes gentleSway {
+      0%, 100% { transform: rotate(-2deg) translateY(0); }
+      50% { transform: rotate(2deg) translateY(-2px); }
+    }
+
+    .plant-sway {
+      transform-origin: bottom center;
+      animation: gentleSway 3.4s ease-in-out infinite;
+    }
+
+    @keyframes waterBounce {
+      0% { transform: scale(1); }
+      35% { transform: scale(1.16, 0.88); }
+      65% { transform: scale(0.94, 1.08); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-water-bounce {
+      animation: waterBounce 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes floatUpParticle {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -26px) scale(1.15);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -48px) scale(0.95);
+      }
+    }
+
+    .floating-particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      animation: floatUpParticle 0.85s ease-out forwards;
+      text-shadow: 0 2px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+    }
+
+    @keyframes sparklePulse {
+      0%, 100% { opacity: 0.45; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+
+    .harvest-glow {
+      box-shadow:
+        inset 0 0 0 3px #fff3b0,
+        0 0 0 4px #ffd166,
+        0 8px 20px rgba(255, 209, 102, 0.45);
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #e6ccb2;
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #a47148;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body class="pb-12">
+
+  <!-- Sky Header Banner -->
+  <header class="relative overflow-hidden border-b-4 border-[#8c583a] bg-gradient-to-b from-[#bde0fe] via-[#d8f3ff] to-[#e2ece9] pt-4 pb-6 px-3 sm:px-6 shadow-sm">
+    <!-- Decorative Pastel Pixel Sun & Drifting Clouds -->
+    <div class="pointer-events-none absolute top-3 right-6 sm:right-14 opacity-90" aria-hidden="true">
+      <svg width="46" height="46" viewBox="0 0 12 12" shape-rendering="crispEdges">
+        <rect x="4" y="1" width="4" height="10" fill="#ffd166"/>
+        <rect x="1" y="4" width="10" height="4" fill="#ffd166"/>
+        <rect x="3" y="3" width="6" height="6" fill="#ffe699"/>
+        <rect x="4" y="4" width="4" height="4" fill="#fff7d6"/>
+      </svg>
+    </div>
+    <div class="pointer-events-none absolute top-4 left-6 opacity-80 cloud-drift-1" aria-hidden="true">
+      <svg width="68" height="28" viewBox="0 0 17 7" shape-rendering="crispEdges">
+        <rect x="4" y="1" width="6" height="2" fill="#ffffff"/>
+        <rect x="2" y="2" width="12" height="3" fill="#ffffff"/>
+        <rect x="1" y="4" width="15" height="2" fill="#f1f8ff"/>
+      </svg>
+    </div>
+    <div class="pointer-events-none absolute top-9 left-1/2 opacity-70 cloud-drift-2 hidden md:block" aria-hidden="true">
+      <svg width="56" height="24" viewBox="0 0 14 6" shape-rendering="crispEdges">
+        <rect x="3" y="1" width="6" height="2" fill="#ffffff"/>
+        <rect x="1" y="2" width="12" height="3" fill="#ffffff"/>
+      </svg>
+    </div>
+
+    <div class="max-w-6xl mx-auto relative z-10">
+      <!-- Top Utility Bar: Sync Status, Sound, Day Simulator, Account -->
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <!-- Sync Badge -->
+        <div id="sync-status-pill" class="inline-flex items-center gap-2 bg-[#fffdf7]/95 border-2 border-[#8c583a] rounded-full px-3 py-1.5 text-xs sm:text-sm font-bold text-[#582f0e] shadow-sm">
+          <span id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+          <span id="sync-label">Đang kết nối nông trại...</span>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="flex items-center gap-2">
+          <!-- Simulated Date Pill / Test Next Day Button -->
+          <div class="inline-flex items-center bg-[#fffdf7]/95 border-2 border-[#8c583a] rounded-full px-2.5 py-1 text-xs sm:text-sm font-bold text-[#582f0e] shadow-sm">
+            <span class="mr-1.5">📆 <span id="header-current-date">--/--/----</span></span>
+            <button
+              id="btn-next-day"
+              type="button"
+              title="Mô phỏng bước sang ngày hôm sau để kiểm tra cây lớn, héo hoặc quy luật 7 ngày"
+              class="ml-1 px-2 py-0.5 rounded-full bg-[#ffd166] hover:bg-[#ffca4b] border border-[#8c583a] text-[11px] font-extrabold text-[#582f0e] transition active:scale-95"
+            >
+              +1 Ngày <span class="hidden sm:inline">(Mô phỏng)</span> ⏭
+            </button>
+            <button
+              id="btn-reset-day"
+              type="button"
+              title="Quay lại ngày thực tế hôm nay"
+              class="hidden ml-1 px-1.5 py-0.5 rounded-full bg-[#ffafcc] border border-[#8c583a] text-[11px] font-extrabold text-[#582f0e]"
+            >
+              ↺
+            </button>
+          </div>
+
+          <!-- Mute / Unmute Toggle -->
+          <button
+            id="btn-sound-toggle"
+            type="button"
+            aria-label="Bật hoặc tắt âm thanh"
+            class="p-2 bg-[#fffdf7] hover:bg-[#faedcd] border-2 border-[#8c583a] rounded-full text-[#582f0e] shadow-sm transition active:scale-95"
+            title="Âm thanh tưới cây"
+          >
+            <span id="sound-icon" class="text-base leading-none">🔊</span>
+          </button>
+
+          <!-- Multi-device Account Sync Button -->
+          <button
+            id="btn-open-account"
+            type="button"
+            class="inline-flex items-center gap-1.5 bg-[#fffdf7] hover:bg-[#faedcd] border-2 border-[#8c583a] rounded-full px-3 py-1.5 text-xs sm:text-sm font-extrabold text-[#582f0e] shadow-sm transition active:scale-95"
+          >
+            <span id="account-avatar">🧑‍🌾</span>
+            <span id="account-btn-text" class="max-w-[110px] sm:max-w-[150px] truncate">Đồng bộ thiết bị</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Wooden Farm Signboard Title -->
+      <div class="flex flex-col items-center text-center">
+        <div class="wood-sign px-6 py-3 sm:px-10 sm:py-3.5 inline-flex items-center gap-3">
+          <span class="text-2xl sm:text-3xl select-none">🌻</span>
+          <div>
+            <h1 class="font-heading text-xl sm:text-3xl font-black tracking-tight text-[#432818] drop-shadow-[0_1px_0_rgba(255,255,255,0.65)]">
+              Nông Trại Thói Quen
+            </h1>
+            <p class="text-xs sm:text-sm font-bold text-[#582f0e]/90">
+              Chăm cây mỗi ngày • Nuôi dưỡng thói quen • Thu hoạch niềm vui
+            </p>
+          </div>
+          <span class="text-2xl sm:text-3xl select-none">🍓</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="max-w-6xl mx-auto px-3 sm:px-6 -mt-4 relative z-20" aria-label="Điều hướng chính">
+    <div class="grid grid-cols-3 gap-2 sm:gap-4 max-w-2xl mx-auto">
+      <button
+        type="button"
+        data-tab="farm"
+        class="nav-tab active-tab flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-2xl border-4 border-[#8c583a] bg-[#fffdf7] text-[#432818] font-heading font-black text-xs sm:text-base shadow-[0_4px_0_#7f4f24] transition"
+      >
+        <span class="text-base sm:text-xl">🌱</span>
+        <span>Khu Vườn</span>
+        <span id="tab-badge-farm" class="font-pixel text-[11px] bg-[#95d5b2] text-[#1b4332] px-1.5 py-0.5 rounded-md border border-[#3a7d58]">0</span>
+      </button>
+
+      <button
+        type="button"
+        data-tab="barn"
+        class="nav-tab flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-2xl border-4 border-[#8c583a] bg-[#e6ccb2] text-[#582f0e] font-heading font-extrabold text-xs sm:text-base shadow-[0_4px_0_#7f4f24] transition"
+      >
+        <span class="text-base sm:text-xl">🧺</span>
+        <span>Kho Thu Hoạch</span>
+        <span id="tab-badge-barn" class="font-pixel text-[11px] bg-[#ffd166] text-[#582f0e] px-1.5 py-0.5 rounded-md border border-[#8c583a]">0</span>
+      </button>
+
+      <button
+        type="button"
+        data-tab="calendar"
+        class="nav-tab flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-2xl border-4 border-[#8c583a] bg-[#e6ccb2] text-[#582f0e] font-heading font-extrabold text-xs sm:text-base shadow-[0_4px_0_#7f4f24] transition"
+      >
+        <span class="text-base sm:text-xl">📅</span>
+        <span>Lịch Chăm Sóc</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 mt-6">
+
+    <!-- ==================== TAB 1: KHU VƯỜN (MY FARM) ==================== -->
+    <section id="view-farm" class="space-y-6">
+      <!-- Daily Progress Summary Banner -->
+      <div class="wood-panel p-4 sm:p-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+              <span class="inline-flex items-center gap-1 bg-[#ffd166] border-2 border-[#8c583a] rounded-lg px-2.5 py-0.5 text-xs font-extrabold text-[#432818]">
+                💧 Tiến độ hôm nay
+              </span>
+              <span id="daily-summary-fraction" class="font-pixel text-sm sm:text-base font-bold text-[#432818]">
+                0/0 thói quen hoàn thành
+              </span>
+            </div>
+
+            <!-- Pastel Progress Bar -->
+            <div class="w-full h-5 bg-[#fffdf7] border-3 border-[#8c583a] rounded-full overflow-hidden p-0.5 shadow-inner">
+              <div
+                id="daily-summary-bar"
+                class="h-full rounded-full bg-gradient-to-r from-[#95d5b2] via-[#74c69d] to-[#52b788] transition-all duration-500 flex items-center justify-end pr-1.5"
+                style="width: 0%"
+              >
+                <span id="daily-summary-percent" class="font-pixel text-[10px] text-[#1b4332] font-bold">0%</span>
+              </div>
+            </div>
+            <p id="daily-encouragement" class="text-xs sm:text-sm font-bold text-[#582f0e] mt-1.5">
+              Chạm nhẹ (single-click) vào từng ô cây để tưới nước hoàn thành thói quen mỗi ngày nhé!
+            </p>
+          </div>
+
+          <!-- Stats Chips & New Seed CTA -->
+          <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5">
+            <div class="cream-box px-3.5 py-2 text-center min-w-[92px]">
+              <div class="text-[11px] font-bold text-[#7f4f24]">Chuỗi cao nhất</div>
+              <div class="font-pixel text-lg font-bold text-[#e07a5f]">🔥 <span id="stat-best-streak">0</span>d</div>
+            </div>
+            <div class="cream-box px-3.5 py-2 text-center min-w-[92px]">
+              <div class="text-[11px] font-bold text-[#7f4f24]">Đã thu hoạch</div>
+              <div class="font-pixel text-lg font-bold text-[#3a7d58]">🧺 <span id="stat-total-harvested">0</span></div>
+            </div>
+            <button
+              id="btn-open-new-seed"
+              type="button"
+              class="btn-mint px-4 py-3 text-sm sm:text-base flex items-center gap-2 whitespace-nowrap shadow-md"
+            >
+              <span class="text-lg">🌱</span>
+              <span>Gieo hạt mới</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Farm Plots Responsive Grid -->
+      <div id="farm-plots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: KHO THU HOẠCH (HARVEST BARN) ==================== -->
+    <section id="view-barn" class="hidden space-y-6">
+      <div class="wood-panel p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div>
+            <h2 class="font-heading text-xl sm:text-2xl font-black text-[#432818] flex items-center gap-2">
+              <span>🧺</span> Kho Thu Hoạch Nông Sản
+            </h2>
+            <p class="text-xs sm:text-sm font-bold text-[#6f4518]">
+              Mỗi cây trưởng thành là một thói quen bền bỉ bạn đã chinh phục thành công!
+            </p>
+          </div>
+          <div class="cream-box px-4 py-2 inline-flex items-center gap-2 self-start">
+            <span class="text-lg">🏆</span>
+            <span class="text-xs sm:text-sm font-extrabold text-[#432818]">
+              Tổng cộng: <span id="barn-total-count" class="font-pixel text-base text-[#3a7d58]">0</span> mùa vụ
+            </span>
+          </div>
+        </div>
+
+        <!-- Barn Plant Type Counter Shelf -->
+        <div id="barn-species-shelf" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 mb-6">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Filter Pills -->
+        <div id="barn-filter-bar" class="flex flex-wrap items-center gap-2 mb-5">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Harvested Cards Grid -->
+        <div id="barn-harvest-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: LỊCH CHĂM SÓC (CALENDAR) ==================== -->
+    <section id="view-calendar" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Left/Main: Monthly Calendar Grid -->
+        <div class="lg:col-span-7 xl:col-span-8 wood-panel p-4 sm:p-6">
+          <!-- Month Navigation Header -->
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <button id="btn-prev-month" type="button" class="btn-wood px-3 py-1.5 text-xs sm:text-sm">
+              ◀ Tháng trước
+            </button>
+            <div class="text-center">
+              <h2 id="calendar-month-title" class="font-heading text-lg sm:text-xl font-black text-[#432818]">
+                Tháng 11, 2026
+              </h2>
+              <button id="btn-today-month" type="button" class="text-xs font-extrabold text-[#3a7d58] hover:underline">
+                Về tháng hiện tại
+              </button>
+            </div>
+            <button id="btn-next-month" type="button" class="btn-wood px-3 py-1.5 text-xs sm:text-sm">
+              Tháng sau ▶
+            </button>
+          </div>
+
+          <!-- Monthly Quick Summary Strip -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+            <div class="cream-box p-2.5 text-center">
+              <div class="text-[11px] font-bold text-[#7f4f24]">Ngày có chăm cây</div>
+              <div class="font-pixel text-base sm:text-lg font-bold text-[#3a7d58]" id="cal-stat-active-days">0</div>
+            </div>
+            <div class="cream-box p-2.5 text-center">
+              <div class="text-[11px] font-bold text-[#7f4f24]">Ngày đạt 100%</div>
+              <div class="font-pixel text-base sm:text-lg font-bold text-[#d97706]" id="cal-stat-perfect-days">0 ⭐</div>
+            </div>
+            <div class="cream-box p-2.5 text-center">
+              <div class="text-[11px] font-bold text-[#7f4f24]">Tỷ lệ trung bình</div>
+              <div class="font-pixel text-base sm:text-lg font-bold text-[#432818]" id="cal-stat-avg-rate">0%</div>
+            </div>
+          </div>
+
+          <!-- Weekday Headers (Mon - Sun) -->
+          <div class="grid grid-cols-7 gap-1.5 sm:gap-2 text-center mb-1.5">
+            <div class="font-heading font-extrabold text-xs text-[#6f4518] py-1">T2</div>
+            <div class="font-heading font-extrabold text-xs text-[#6f4518] py-1">T3</div>
+            <div class="font-heading font-extrabold text-xs text-[#6f4518] py-1">T4</div>
+            <div class="font-heading font-extrabold text-xs text-[#6f4518] py-1">T5</div>
+            <div class="font-heading font-extrabold text-xs text-[#6f4518] py-1">T6</div>
+            <div class="font-heading font-extrabold text-xs text-[#9e4767] py-1">T7</div>
+            <div class="font-heading font-extrabold text-xs text-[#9e4767] py-1">CN</div>
+          </div>
+
+          <!-- Calendar Days Grid -->
+          <div id="calendar-days-grid" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Legend -->
+          <div class="flex flex-wrap items-center justify-center gap-3 mt-4 pt-3 border-t-2 border-[#d4a373]/50 text-xs font-bold text-[#582f0e]">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-[#fffdf7] border-2 border-[#d4a373]"></span> 0%
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-[#fef3c7] border-2 border-[#f59e0b]"></span> 1–49%
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-[#d8f3dc] border-2 border-[#52b788]"></span> 50–99%
+            </span>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-[#95d5b2] border-2 border-[#2d6a4f]"></span> 100% ⭐
+            </span>
+          </div>
+        </div>
+
+        <!-- Right: Selected Day Detail Log -->
+        <div class="lg:col-span-5 xl:col-span-4 wood-panel p-4 sm:p-6 flex flex-col">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-heading text-lg font-black text-[#432818] flex items-center gap-2">
+              <span>📖</span> Nhật ký ngày <span id="detail-date-label" class="text-[#3a7d58]">--/--/----</span>
+            </h3>
+          </div>
+
+          <!-- Selected Date Completion Card -->
+          <div class="cream-box p-3.5 mb-4">
+            <div class="flex items-center justify-between text-xs sm:text-sm font-extrabold text-[#432818] mb-1.5">
+              <span>Tiến độ hoàn thành trong ngày</span>
+              <span id="detail-date-ratio" class="font-pixel text-sm text-[#3a7d58]">0/0 (0%)</span>
+            </div>
+            <div class="w-full h-3.5 bg-[#faedcd] border-2 border-[#8c583a] rounded-full overflow-hidden">
+              <div id="detail-date-bar" class="h-full bg-[#74c69d] transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Habits Breakdown List for Selected Date -->
+          <div id="detail-habits-list" class="space-y-2.5 flex-1 overflow-y-auto max-h-[420px] pr-1">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MODAL 1: GIEO HẠT / CHỈNH SỬA CÂY ==================== -->
+  <div id="modal-seed" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/45 backdrop-blur-[2px] p-3 sm:p-4 overflow-y-auto">
+    <div class="wood-panel w-full max-w-lg p-5 sm:p-6 relative my-auto animate-water-bounce">
+      <div class="flex items-center justify-between mb-4">
+        <h3 id="modal-seed-title" class="font-heading text-xl font-black text-[#432818] flex items-center gap-2">
+          <span>🌱</span> Gieo Hạt Giống Mới
+        </h3>
+        <button type="button" id="btn-close-seed-modal" class="w-9 h-9 rounded-full bg-[#ffafcc] border-2 border-[#8c583a] font-black text-[#582f0e] flex items-center justify-center hover:brightness-105">
+          ✕
+        </button>
+      </div>
+
+      <form id="form-seed" class="space-y-4">
+        <input type="hidden" id="seed-edit-id" value="" />
+
+        <!-- 1. Habit Name -->
+        <div>
+          <label for="input-habit-name" class="block text-sm font-extrabold text-[#432818] mb-1">
+            1. Tên thói quen muốn rèn luyện
+          </label>
+          <input
+            id="input-habit-name"
+            type="text"
+            required
+            maxlength="42"
+            placeholder="Ví dụ: Đọc sách, Uống thuốc, Học từ vựng..."
+            class="w-full px-3.5 py-2.5 bg-[#fffdf7] border-3 border-[#8c583a] rounded-xl font-bold text-[#432818] focus:outline-none focus:ring-2 focus:ring-[#95d5b2]"
+          />
+          <!-- Quick Habit Presets -->
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            <button type="button" class="preset-habit text-xs font-bold bg-[#faedcd] hover:bg-[#ffd166] border border-[#8c583a] rounded-full px-2.5 py-1 text-[#582f0e]" data-name="Đọc sách" data-clicks="1" data-plant="strawberry">
+              📖 Đọc sách (1 lần/ngày)
+            </button>
+            <button type="button" class="preset-habit text-xs font-bold bg-[#faedcd] hover:bg-[#ffd166] border border-[#8c583a] rounded-full px-2.5 py-1 text-[#582f0e]" data-name="Uống thuốc" data-clicks="2" data-plant="sunflower">
+              💊 Uống thuốc (2 lần/ngày)
+            </button>
+            <button type="button" class="preset-habit text-xs font-bold bg-[#faedcd] hover:bg-[#ffd166] border border-[#8c583a] rounded-full px-2.5 py-1 text-[#582f0e]" data-name="Uống đủ nước" data-clicks="4" data-plant="tulip">
+              💧 Uống nước (4 lần/ngày)
+            </button>
+            <button type="button" class="preset-habit text-xs font-bold bg-[#faedcd] hover:bg-[#ffd166] border border-[#8c583a] rounded-full px-2.5 py-1 text-[#582f0e]" data-name="Tập thể dục" data-clicks="1" data-plant="carrot">
+              🏃 Tập thể dục (1 lần/ngày)
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Plant Seed Selector -->
+        <div>
+          <label class="block text-sm font-extrabold text-[#432818] mb-1.5">
+            2. Chọn loại hạt giống cây trồng
+          </label>
+          <div id="seed-species-grid" class="grid grid-cols-4 gap-2">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- 3. Daily Clicks Requirement -->
+        <div class="cream-box p-3.5">
+          <label for="input-daily-target" class="block text-sm font-extrabold text-[#432818] mb-1">
+            3. Số lần thực hiện mỗi ngày (số lần nhấp để cây lớn)
+          </label>
+          <p class="text-xs font-semibold text-[#7f4f24] mb-2">
+            Mỗi lần single-click vào cây = 1 lần hoàn thành. Đạt đủ số lần/ngày cây sẽ tươi tốt & tăng ngày trưởng thành!
+          </p>
+          <div class="flex items-center gap-2">
+            <div class="flex gap-1.5">
+              <button type="button" class="quick-clicks px-3 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="1">1x</button>
+              <button type="button" class="quick-clicks px-3 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="2">2x</button>
+              <button type="button" class="quick-clicks px-3 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="3">3x</button>
+              <button type="button" class="quick-clicks px-3 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="4">4x</button>
+            </div>
+            <input
+              id="input-daily-target"
+              type="number"
+              min="1"
+              max="10"
+              value="1"
+              required
+              class="w-20 px-2.5 py-1.5 bg-[#fffdf7] border-2 border-[#8c583a] rounded-lg font-pixel text-sm font-bold text-center text-[#432818]"
+            />
+            <span class="text-xs font-extrabold text-[#582f0e]">lần/ngày (1–10)</span>
+          </div>
+        </div>
+
+        <!-- 4. Target Growth Days to Harvest -->
+        <div class="cream-box p-3.5">
+          <label for="input-target-days" class="block text-sm font-extrabold text-[#432818] mb-1">
+            4. Số ngày tích lũy để thu hoạch
+          </label>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex gap-1.5">
+              <button type="button" class="quick-days px-2.5 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="7">7d</button>
+              <button type="button" class="quick-days px-2.5 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="14">14d</button>
+              <button type="button" class="quick-days px-2.5 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="21">21d</button>
+              <button type="button" class="quick-days px-2.5 py-1.5 rounded-lg border-2 border-[#8c583a] bg-[#faedcd] font-pixel text-xs font-bold text-[#432818]" data-val="30">30d</button>
+            </div>
+            <input
+              id="input-target-days"
+              type="number"
+              min="3"
+              max="120"
+              value="7"
+              required
+              class="w-20 px-2.5 py-1.5 bg-[#fffdf7] border-2 border-[#8c583a] rounded-lg font-pixel text-sm font-bold text-center text-[#432818]"
+            />
+            <span class="text-xs font-extrabold text-[#582f0e]">ngày</span>
+          </div>
+        </div>
+
+        <!-- Submit & Delete Actions -->
+        <div class="flex items-center justify-between gap-3 pt-2">
+          <button
+            type="button"
+            id="btn-delete-plot"
+            class="hidden btn-pink px-4 py-2.5 text-xs sm:text-sm"
+          >
+            🗑️ Xóa ô cây
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button type="button" id="btn-cancel-seed" class="btn-wood px-4 py-2.5 text-xs sm:text-sm">
+              Hủy
+            </button>
+            <button type="submit" id="btn-save-seed" class="btn-mint px-5 py-2.5 text-xs sm:text-sm">
+              🌱 Gieo hạt ngay
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: ĐỒNG BỘ TÀI KHOẢN ĐA THIẾT BỊ ==================== -->
+  <div id="modal-account" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/45 backdrop-blur-[2px] p-3 sm:p-4 overflow-y-auto">
+    <div class="wood-panel w-full max-w-md p-5 sm:p-6 relative my-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-heading text-xl font-black text-[#432818] flex items-center gap-2">
+          <span>☁️</span> Đồng Bộ Đa Thiết Bị
+        </h3>
+        <button type="button" id="btn-close-account-modal" class="w-9 h-9 rounded-full bg-[#ffafcc] border-2 border-[#8c583a] font-black text-[#582f0e] flex items-center justify-center">
+          ✕
+        </button>
+      </div>
+
+      <!-- Current Account Status Card -->
+      <div class="cream-box p-3.5 mb-4 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-[#7f4f24]">Trạng thái hiện tại:</span>
+          <span id="modal-auth-badge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#ffd166] text-[#432818] border border-[#8c583a]">
+            Chế độ khách (Lưu trên máy)
+          </span>
+        </div>
+        <div id="modal-user-email-row" class="hidden text-xs font-bold text-[#432818]">
+          Tài khoản: <span id="modal-user-email" class="font-extrabold text-[#3a7d58]"></span>
+        </div>
+        <div class="text-[11px] font-bold text-[#7f4f24]">
+          Mã nông dân (User ID):
+          <div class="flex items-center gap-1.5 mt-1">
+            <code id="modal-user-uid" class="flex-1 bg-[#faedcd] px-2 py-1 rounded border border-[#d4a373] text-[10px] break-all font-mono text-[#432818]">Chưa đăng nhập</code>
+            <button type="button" id="btn-copy-uid" class="px-2.5 py-1 bg-[#e6ccb2] hover:bg-[#d4a373] border border-[#8c583a] rounded text-[11px] font-extrabold text-[#432818]">
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vietnamese Auth & Firestore Error Box -->
+      <div id="auth-error-box" class="hidden mb-4 p-3 rounded-xl bg-[#ffe5ec] border-2 border-[#e63946] text-xs font-bold text-[#800f2f] leading-relaxed"></div>
+
+      <!-- Signed-out / Guest Login Options -->
+      <div id="auth-signin-section" class="space-y-4">
+        <p class="text-xs font-bold text-[#582f0e] leading-relaxed">
+          Đăng nhập cùng một tài khoản trên <strong>Laptop, iPad và Điện thoại</strong> để khu vườn, lịch sử chăm sóc và kho thu hoạch luôn tự động đồng bộ tức thì!
+        </p>
+
+        <!-- Google Sign In -->
+        <button
+          type="button"
+          id="btn-google-signin"
+          class="w-full py-2.5 px-4 bg-[#fffdf7] hover:bg-[#faedcd] border-3 border-[#8c583a] rounded-xl font-extrabold text-sm text-[#432818] shadow-[0_3px_0_#7f4f24] flex items-center justify-center gap-2.5 transition active:translate-y-0.5"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.8C6.2 7.2 8.9 5 12 5z"/>
+            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.5H12v4.8h6.5c-.3 1.5-1.1 2.8-2.4 3.6l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
+            <path fill="#FBBC05" d="M5.3 14.8c-.2-.8-.4-1.6-.4-2.5s.2-1.7.4-2.5L1.6 7C.6 9 0 11.2 0 13.5s.6 4.5 1.6 6.5l3.7-2.8z"/>
+            <path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5l-3.7 2.8C3.5 21.1 7.4 24 12 24z"/>
+          </svg>
+          <span>Tiếp tục với Google</span>
+        </button>
+
+        <div class="relative flex items-center py-1">
+          <div class="flex-grow border-t-2 border-[#d4a373]"></div>
+          <span class="flex-shrink mx-3 text-xs font-extrabold text-[#7f4f24]">HOẶC DÙNG EMAIL</span>
+          <div class="flex-grow border-t-2 border-[#d4a373]"></div>
+        </div>
+
+        <!-- Email / Password Form -->
+        <form id="form-email-auth" class="space-y-2.5">
+          <input
+            id="auth-email"
+            type="email"
+            required
+            placeholder="Email của bạn..."
+            class="w-full px-3.5 py-2 bg-[#fffdf7] border-2 border-[#8c583a] rounded-xl text-sm font-bold text-[#432818]"
+          />
+          <input
+            id="auth-password"
+            type="password"
+            required
+            minlength="6"
+            placeholder="Mật khẩu (tối thiểu 6 ký tự)..."
+            class="w-full px-3.5 py-2 bg-[#fffdf7] border-2 border-[#8c583a] rounded-xl text-sm font-bold text-[#432818]"
+          />
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="submit" data-mode="login" class="btn-mint py-2 text-xs sm:text-sm">
+              Đăng nhập
+            </button>
+            <button type="submit" data-mode="register" class="btn-wood py-2 text-xs sm:text-sm">
+              Đăng ký mới
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Signed-in Sign Out Option -->
+      <div id="auth-signout-section" class="hidden space-y-3">
+        <p class="text-xs font-bold text-[#3a7d58] bg-[#d8f3dc] border-2 border-[#52b788] rounded-xl p-3">
+          ✅ Khu vườn của bạn đang được sao lưu đám mây tự động. Hãy đăng nhập cùng tài khoản này trên iPad hoặc điện thoại để tiếp tục chăm sóc!
+        </p>
+        <button type="button" id="btn-signout" class="w-full btn-pink py-2.5 text-sm">
+          Đăng xuất khỏi tài khoản
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: CUSTOM CONFIRMATION DIALOG ==================== -->
+  <div id="modal-confirm" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/45 backdrop-blur-[2px] p-4">
+    <div class="wood-panel w-full max-w-sm p-5 text-center space-y-4">
+      <div id="confirm-icon" class="text-4xl">🌿</div>
+      <h4 id="confirm-title" class="font-heading text-lg font-black text-[#432818]">Xác nhận</h4>
+      <p id="confirm-message" class="text-sm font-bold text-[#582f0e]">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+      <div class="flex items-center justify-center gap-3 pt-1">
+        <button type="button" id="btn-confirm-cancel" class="btn-wood px-4 py-2 text-sm">Quay lại</button>
+        <button type="button" id="btn-confirm-ok" class="btn-pink px-5 py-2 text-sm">Đồng ý</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Banner -->
+  <div id="toast-container" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-full max-w-md px-4"></div>
+
+  <!-- ==================== APPLICATION SCRIPT & FIREBASE ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      onSnapshot
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    // Pre-configured Firebase credentials for real-time multi-device sync
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpfkRfJi_E41JM2rdR9-xupvbux6_bH8s",
+      authDomain: "streak-f76ab.firebaseapp.com",
+      projectId: "streak-f76ab",
+      storageBucket: "streak-f76ab.firebasestorage.app",
+      messagingSenderId: "2893637724",
+      appId: "1:2893637724:web:66ca3e27d27b7e41955e99",
+      measurementId: "G-FNPR79DYB2"
+    };
+
+    const LOCAL_STORAGE_KEY = "stardew_habit_farm_guest_v1";
+
+    // =========================================================================
+    // 1. PLANT CATALOG & CRISP PIXEL-ART SVG RENDERER (16x16 GRID)
+    // =========================================================================
+    const PLANT_SPECIES = {
+      strawberry: {
+        id: 'strawberry',
+        name: 'Dâu tây',
+        badgeBg: '#ffe5ec',
+        badgeBorder: '#ff8fab',
+        palette: {
+          G: '#52b788', // vibrant leaf
+          g: '#2d6a4f', // dark leaf outline
+          R: '#ff5d8f', // ripe pastel-ruby berry
+          r: '#ff8fab', // highlight berry
+          Y: '#ffe66d', // berry seeds / flower center
+          W: '#fffdf7'  // white blossom petals
+        },
+        // Stage 3: Leafy bush, Stage 4: White strawberry blossoms, Stage 5: Plump ripe strawberries
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '.....gG..Gg.....',
+          '....gGGGgGGg....',
+          '...gGGGGGGGGg...',
+          '..gGGgGGGGgGGg..',
+          '..gGg..gg..gGg..',
+          '.......gg.......',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '................',
+          '................',
+          '....WW....WW....',
+          '...WYYW..WYYW...',
+          '....WWgGGgWW....',
+          '...gGGGGGGGGg...',
+          '..gGGgGGGGgGGg..',
+          '..gGg.WYYW.gGg..',
+          '.......WW.......',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '................',
+          '................',
+          '................',
+          '.....gG..Gg.....',
+          '....gGGGGGGg....',
+          '...gGGgGGgGGg...',
+          '..gRRg.gg.gRRg..',
+          '.gRrRRg..gRrRRg.',
+          '.gRYRRg..gRYRRg.',
+          '..gRRg.gG.gRRg..',
+          '...gg.gRRg.gg...',
+          '.....gRrRRg.....',
+          '......gRYg......',
+          '.......gg.......',
+          '................',
+          '................'
+        ]
+      },
+      sunflower: {
+        id: 'sunflower',
+        name: 'Hướng dương',
+        badgeBg: '#fff3b0',
+        badgeBorder: '#f4a261',
+        palette: {
+          G: '#52b788',
+          g: '#2d6a4f',
+          Y: '#ffd166',
+          y: '#f4a261',
+          B: '#6f4518',
+          b: '#9c6644'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '.......gg.......',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '...gGg.gg.gGg...',
+          '..gGGGgGGgGGGg..',
+          '...ggg.gg.ggg...',
+          '.......gg.......',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '......yYYy......',
+          '.....yYYYYy.....',
+          '.....yYBBYy.....',
+          '......yYYy......',
+          '.......gg.......',
+          '...gGg.gg.gGg...',
+          '..gGGGgGGgGGGg..',
+          '...ggg.gg.ggg...',
+          '.......gg.......',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '.....yY..Yy.....',
+          '...yYYYYYYYYy...',
+          '..yYYBBBBBBYYy..',
+          '.yYYBBbBBbBBYYy.',
+          '.yYYBBBBBBBBYYy.',
+          '..yYYBBBBBBYYy..',
+          '...yYYYYYYYYy...',
+          '.....yYggYy.....',
+          '...gGg.gg.gGg...',
+          '..gGGGgGGgGGGg..',
+          '...ggg.gg.ggg...',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      lavender: {
+        id: 'lavender',
+        name: 'Oải hương',
+        badgeBg: '#f3e8ff',
+        badgeBorder: '#c084fc',
+        palette: {
+          G: '#74c69d',
+          g: '#40916c',
+          P: '#cdb4db',
+          p: '#9d4edd',
+          L: '#ffc8dd'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '.....g....g.....',
+          '....gGg..gGg....',
+          '....gGg..gGg....',
+          '...gGGg..gGGg...',
+          '....gGggggGg....',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '................',
+          '.....p....p.....',
+          '....pPp..pPp....',
+          '.....p....p.....',
+          '....gGg..gGg....',
+          '...gGGg..gGGg...',
+          '....gGggggGg....',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '.......pP.......',
+          '....pP.PL.Pp....',
+          '...pPLpPPpLPp...',
+          '....pP.pP.Pp....',
+          '...pPLpggpLPp...',
+          '....gGgGGgGg....',
+          '...gGGgGGgGGg...',
+          '....gGggggGg....',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '.....gGGGGg.....',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      carrot: {
+        id: 'carrot',
+        name: 'Cà rốt',
+        badgeBg: '#ffedd8',
+        badgeBorder: '#f4a261',
+        palette: {
+          G: '#52b788',
+          g: '#2d6a4f',
+          O: '#ff9f1c',
+          o: '#e76f51',
+          Y: '#ffbf69'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '....gG....Gg....',
+          '...gGGg..gGGg...',
+          '....gGGggGGg....',
+          '.....gGGGGg.....',
+          '......gggg......',
+          '.....oOOOOo.....',
+          '......oOOo......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '...gG..gg..Gg...',
+          '..gGGggGGggGGg..',
+          '...gGGGGGGGGg...',
+          '.....gGGGGg.....',
+          '.....oYYYYo.....',
+          '....oOOOOOOo....',
+          '.....oOOOOo.....',
+          '......oOOo......',
+          '.......oo.......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '..gG...gg...Gg..',
+          '.gGGg.gGGg.gGGg.',
+          '..gGGGGGGGGGGg..',
+          '....gGGGGGGg....',
+          '....oYYYYYYo....',
+          '...oOOYOOOOOo...',
+          '...oOOOOOOYPo...',
+          '....oOOOOOOo....',
+          '.....oOOOOo.....',
+          '......oOOo......',
+          '.......oo.......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      tomato: {
+        id: 'tomato',
+        name: 'Cà chua',
+        badgeBg: '#ffe5d9',
+        badgeBorder: '#f28482',
+        palette: {
+          G: '#52b788',
+          g: '#2d6a4f',
+          R: '#f25c54',
+          r: '#ff8fa3',
+          Y: '#ffd166'
+        },
+        stage3: [
+          '................',
+          '................',
+          '.......gg.......',
+          '......gGGg......',
+          '....gGgGGgGg....',
+          '...gGGGGGGGGg...',
+          '....gggGGggg....',
+          '......gGGg......',
+          '....gGgGGgGg....',
+          '...gGGGGGGGGg...',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '.......gg.......',
+          '......gGGg......',
+          '...YY.gGGg.YY...',
+          '..gGGGGGGGGGGg..',
+          '...ggg.gg.ggg...',
+          '......gGGg......',
+          '...YYgGGGGgYY...',
+          '....gGGGGGGg....',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '.......gg.......',
+          '......gGGg......',
+          '....gGGGGGGg....',
+          '..gRRg.gg.gRRg..',
+          '.gRrRRgGGgRrRRg.',
+          '.gRRRRgGGgRRRRg.',
+          '..gRRgGGGGgRRg..',
+          '...gg.gRRg.gg...',
+          '.....gRrRRg.....',
+          '.....gRRRRg.....',
+          '......gRRg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      pumpkin: {
+        id: 'pumpkin',
+        name: 'Bí ngô',
+        badgeBg: '#fde4cf',
+        badgeBorder: '#f4a261',
+        palette: {
+          G: '#52b788',
+          g: '#2d6a4f',
+          O: '#f4a261',
+          o: '#e76f51',
+          Y: '#ffd166'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '.....gG..Gg.....',
+          '....gGGGGGGg....',
+          '...gGGgGGgGGg...',
+          '..gGGGg..gGGGg..',
+          '...ggg....ggg...',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '................',
+          '................',
+          '.....gG..Gg.....',
+          '....gGGGGGGg....',
+          '...gGGgYYgGGg...',
+          '..gGGgYYYYgGGg..',
+          '...gg.oOOo.gg...',
+          '......oOOo......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '................',
+          '.......gGg......',
+          '......gGGg......',
+          '...oOOoYYoOOo...',
+          '..oOYYOoOOYYOo..',
+          '.oOYYOOoOOYYOOo.',
+          '.oOOOOOoOOOOOOo.',
+          '.oOOOOOoOOOOOOo.',
+          '..oOOOOoOOOOOo..',
+          '...oOOOoOOOOo...',
+          '....oooooooo....',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      cactus: {
+        id: 'cactus',
+        name: 'Xương rồng hoa',
+        badgeBg: '#d8f3dc',
+        badgeBorder: '#52b788',
+        palette: {
+          G: '#74c69d',
+          g: '#2d6a4f',
+          L: '#b7e4c7',
+          P: '#ff8fab',
+          p: '#fb6f92',
+          Y: '#ffd166'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '......gggg......',
+          '.....gGLLGg.....',
+          '.....gGLLGg.....',
+          '.....gGGGGg.....',
+          '.....gGLLGg.....',
+          '.....gGGGGg.....',
+          '......gggg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '.......pp.......',
+          '......pPPp......',
+          '......gggg......',
+          '.....gGLLGg.....',
+          '..gggGLLLLGggg..',
+          '.gGLgGLLLLGgLGg.',
+          '.gGGgGGGGGGgGGg.',
+          '..gggGLLLLGggg..',
+          '.....gGGGGg.....',
+          '......gggg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '.....pP..Pp.....',
+          '....pPPYYPPp....',
+          '.....pPPPPp.....',
+          '......gggg......',
+          '..gggGLLLLGggg..',
+          '.gGLgGLLLLGgLGg.',
+          '.gGLgGLLLLGgLGg.',
+          '.gGGgGGGGGGgGGg.',
+          '..gggGLLLLGggg..',
+          '.....gGGGGg.....',
+          '......gggg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      tulip: {
+        id: 'tulip',
+        name: 'Tulip hồng',
+        badgeBg: '#ffc8dd',
+        badgeBorder: '#ff8fab',
+        palette: {
+          G: '#52b788',
+          g: '#2d6a4f',
+          P: '#ffafcc',
+          p: '#ff70a6',
+          W: '#ffe5ec'
+        },
+        stage3: [
+          '................',
+          '................',
+          '................',
+          '.......gg.......',
+          '......gGGg......',
+          '......gGGg......',
+          '....gGgGGgGg....',
+          '...gGGGGGGGGg...',
+          '....gGgGGgGg....',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage4: [
+          '................',
+          '......pPPp......',
+          '.....pPWWPp.....',
+          '.....pPPPPp.....',
+          '......pPPp......',
+          '.......gg.......',
+          '....gGgGGgGg....',
+          '...gGGGGGGGGg...',
+          '....gGgGGgGg....',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ],
+        stage5: [
+          '....pP.pp.Pp....',
+          '...pPWPppPWPp...',
+          '...pPWPPPPWPp...',
+          '...pPPPPPPPPp...',
+          '....pPPPPPPp....',
+          '.....pPPPPp.....',
+          '.......gg.......',
+          '...gGg.gg.gGg...',
+          '..gGGGgGGgGGGg..',
+          '...gGGgGGgGGg...',
+          '.....gGGGGg.....',
+          '......gGGg......',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      }
+    };
+
+    // Universal Stage 1 (Seed) & Stage 2 (Sprout) pixel grids
+    const COMMON_STAGES = {
+      stage1: {
+        palette: { Y: '#ffd166', B: '#9c6644', b: '#6f4518', S: '#fff3b0' },
+        grid: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '.......S........',
+          '......bBb.......',
+          '.....bBYYBb.....',
+          '.....bBYYBb.....',
+          '......bbbb......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      stage2: {
+        palette: { G: '#74c69d', g: '#2d6a4f', L: '#b7e4c7' },
+        grid: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '................',
+          '....ggg..ggg....',
+          '...gGLLggLLGg...',
+          '....gggGGggg....',
+          '.......gg.......',
+          '......gGGg......',
+          '......gggg......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      },
+      dead: {
+        palette: { D: '#8c8279', d: '#5c534b', A: '#b0a69c' },
+        grid: [
+          '................',
+          '................',
+          '................',
+          '................',
+          '.......dd.......',
+          '......dDDd......',
+          '.....dD..Dd.....',
+          '....dDd..dd.....',
+          '......dd........',
+          '.....dDDd.......',
+          '....dddddd......',
+          '................',
+          '................',
+          '................',
+          '................',
+          '................'
+        ]
+      }
+    };
+
+    /**
+     * Adjusts pixel palette color based on wilting severity (missedDays 0..7)
+     */
+    function applyWiltColorTransform(hex, missedDays) {
+      if (missedDays <= 0) return hex;
+      // Parse hex
+      const num = parseInt(hex.slice(1), 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
+
+      if (missedDays === 1) {
+        // Slightly dry: subtle warm yellow-olive shift
+        r = Math.min(255, Math.round(r * 1.06 + 8));
+        g = Math.round(g * 0.96);
+        b = Math.round(b * 0.82);
+      } else if (missedDays <= 3) {
+        // Drooping / yellowing
+        r = Math.min(255, Math.round(r * 1.12 + 18));
+        g = Math.round(g * 0.85);
+        b = Math.round(b * 0.58);
+      } else {
+        // Severely wilted (4-6 days)
+        r = Math.round(r * 0.82 + 30);
+        g = Math.round(g * 0.62 + 15);
+        b = Math.round(b * 0.42);
+      }
+      return `rgb(${r},${g},${b})`;
+    }
+
+    /**
+     * Generates a crisp pixel-art SVG string for a given plant species, growth stage (1..5), and missedDays
+     */
+    function renderPlantSVG(speciesId, stage = 5, missedDays = 0, sizePx = 88) {
+      const species = PLANT_SPECIES[speciesId] || PLANT_SPECIES.strawberry;
+      let grid, palette;
+
+      if (missedDays >= 7) {
+        grid = COMMON_STAGES.dead.grid;
+        palette = COMMON_STAGES.dead.palette;
+      } else if (stage === 1) {
+        grid = COMMON_STAGES.stage1.grid;
+        palette = COMMON_STAGES.stage1.palette;
+      } else if (stage === 2) {
+        grid = COMMON_STAGES.stage2.grid;
+        palette = COMMON_STAGES.stage2.palette;
+      } else if (stage === 3) {
+        grid = species.stage3;
+        palette = species.palette;
+      } else if (stage === 4) {
+        grid = species.stage4;
+        palette = species.palette;
+      } else {
+        grid = species.stage5;
+        palette = species.palette;
+      }
+
+      // Slight vertical droop when wilting
+      const yOffset = missedDays >= 4 && missedDays < 7 ? 2 : missedDays >= 2 ? 1 : 0;
+
+      let rects = '';
+      for (let y = 0; y < 16; y++) {
+        const row = grid[y] || '';
+        for (let x = 0; x < 16; x++) {
+          const ch = row[x];
+          if (ch && ch !== '.' && palette[ch]) {
+            const fill = missedDays >= 7 ? palette[ch] : applyWiltColorTransform(palette[ch], missedDays);
+            const drawY = Math.min(15, y + yOffset);
+            rects += `<rect x="${x}" y="${drawY}" width="1" height="1" fill="${fill}"/>`;
+          }
+        }
+      }
+
+      // Add golden harvest sparkles on stage 5 when healthy
+      let sparkles = '';
+      if (stage === 5 && missedDays === 0) {
+        sparkles = `
+          <rect x="2" y="1" width="1" height="1" fill="#ffd166"/>
+          <rect x="13" y="2" width="1" height="1" fill="#fff3b0"/>
+          <rect x="14" y="6" width="1" height="1" fill="#ffd166"/>
+          <rect x="1" y="5" width="1" height="1" fill="#fff3b0"/>
+        `;
+      }
+
+      return `<svg width="${sizePx}" height="${sizePx}" viewBox="0 0 16 16" shape-rendering="crispEdges" class="inline-block select-none">${rects}${sparkles}</svg>`;
+    }
+
+    // =========================================================================
+    // 2. COZY WEB AUDIO API SOUND EFFECTS (NO EXTERNAL URLS)
+    // =========================================================================
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!soundEnabled) return null;
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function playWaterSplashSound() {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(760, now + 0.14);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.17);
+    }
+
+    function playDailyCompleteSound() {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      notes.forEach((freq, idx) => {
+        const now = ctx.currentTime + idx * 0.07;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      });
+    }
+
+    function playHarvestFanfareSound() {
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const melody = [
+        { f: 523.25, t: 0, d: 0.12 },
+        { f: 659.25, t: 0.11, d: 0.12 },
+        { f: 783.99, t: 0.22, d: 0.12 },
+        { f: 1046.5, t: 0.34, d: 0.35 },
+        { f: 880.00, t: 0.52, d: 0.14 },
+        { f: 1046.5, t: 0.66, d: 0.42 }
+      ];
+      melody.forEach((n) => {
+        const now = ctx.currentTime + n.t;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(n.f, now);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + n.d);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + n.d + 0.02);
+      });
+    }
+
+    // =========================================================================
+    // 3. DATE & PLANT GROWTH / WILTING CALCULATIONS
+    // =========================================================================
+    let simulatedDayOffset = 0;
+
+    function formatDateISO(dateObj) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateVN(isoStr) {
+      if (!isoStr) return '--/--/----';
+      const [y, m, d] = isoStr.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function getCurrentDateObj() {
+      const now = new Date();
+      now.setHours(12, 0, 0, 0);
+      if (simulatedDayOffset !== 0) {
+        now.setDate(now.getDate() + simulatedDayOffset);
+      }
+      return now;
+    }
+
+    function getTodayISO() {
+      return formatDateISO(getCurrentDateObj());
+    }
+
+    function diffDaysISO(startISO, endISO) {
+      if (!startISO || !endISO) return 0;
+      const [y1, m1, d1] = startISO.split('-').map(Number);
+      const [y2, m2, d2] = endISO.split('-').map(Number);
+      const t1 = Date.UTC(y1, m1 - 1, d1);
+      const t2 = Date.UTC(y2, m2 - 1, d2);
+      return Math.floor((t2 - t1) / (1000 * 60 * 60 * 24));
+    }
+
+    /**
+     * Computes live state of a plot on `todayISO`:
+     * - todayClicks
+     * - completedToday
+     * - missedDays (0 = healthy, 1..6 = progressive wilting, >=7 = dead)
+     * - stage (1..5)
+     * - isHarvestable
+     * - isDead
+     */
+    function evaluatePlotState(plot, todayISO) {
+      const clicksMap = plot.clicksByDate || {};
+      const todayClicks = Number(clicksMap[todayISO] || 0);
+      const dailyTarget = Math.max(1, Number(plot.dailyTarget || 1));
+      const targetDays = Math.max(1, Number(plot.targetDays || 7));
+      const growthDays = Number(plot.growthDays || 0);
+      const completedToday = todayClicks >= dailyTarget;
+
+      // Determine consecutive missed days before today if not yet completed today
+      let missedDays = 0;
+      if (!completedToday) {
+        const refDate = plot.lastCompletedDate || plot.plantedDate || todayISO;
+        const elapsed = diffDaysISO(refDate, todayISO);
+        // elapsed === 0: planted today; elapsed === 1: completed yesterday (today still open)
+        // elapsed >= 2: missed (elapsed - 1) full calendar days!
+        missedDays = Math.max(0, elapsed - 1);
+      }
+
+      const isDead = missedDays >= 7;
+      const isHarvestable = !isDead && growthDays >= targetDays;
+
+      // Compute visual growth stage (1..5)
+      let stage = 1;
+      if (growthDays <= 0) {
+        stage = 1; // Hạt mầm
+      } else if (growthDays >= targetDays) {
+        stage = 5; // Thu hoạch
+      } else {
+        const ratio = growthDays / targetDays;
+        if (ratio < 0.34) stage = 2;      // Nảy chồi
+        else if (ratio < 0.68) stage = 3; // Cây non
+        else stage = 4;                   // Ra hoa
+      }
+
+      const stageNames = {
+        1: 'Hạt mầm',
+        2: 'Nảy chồi',
+        3: 'Cây non',
+        4: 'Ra hoa',
+        5: 'Thu hoạch!'
+      };
+
+      return {
+        todayClicks,
+        dailyTarget,
+        targetDays,
+        growthDays,
+        completedToday,
+        missedDays,
+        isDead,
+        isHarvestable,
+        stage,
+        stageLabel: isDead ? 'Đã héo chết' : stageNames[stage]
+      };
+    }
+
+    // =========================================================================
+    // 4. APPLICATION STATE & FIREBASE REAL-TIME SYNC
+    // =========================================================================
+    const state = {
+      activeTab: 'farm',
+      user: null,
+      userId: null,
+      isCloudConnected: false,
+      plots: [],       // Active plots in garden
+      harvests: [],    // Harvested crops in barn
+      dailyLogs: {},   // Map of YYYY-MM-DD -> { habits: { [plotId]: { name, species, clicks, target } } }
+      selectedPlantSpecies: 'strawberry',
+      barnFilter: 'all',
+      calendarMonth: new Date().getMonth(),
+      calendarYear: new Date().getFullYear(),
+      selectedCalendarDate: getTodayISO()
+    };
+
+    let db = null;
+    let auth = null;
+    let unsubFarmState = null;
+
+    function detachListeners() {
+      if (unsubFarmState) {
+        unsubFarmState();
+        unsubFarmState = null;
+      }
+    }
+
+    function createDefaultStarterPlots() {
+      const today = getTodayISO();
+      return [
+        {
+          id: 'starter-1',
+          name: 'Đọc sách 15 phút',
+          species: 'strawberry',
+          dailyTarget: 1,
+          targetDays: 7,
+          growthDays: 2,
+          plantedDate: today,
+          lastCompletedDate: null,
+          clicksByDate: {},
+          createdAt: Date.now() - 2000
+        },
+        {
+          id: 'starter-2',
+          name: 'Uống thuốc & Vitamin',
+          species: 'sunflower',
+          dailyTarget: 2,
+          targetDays: 7,
+          growthDays: 4,
+          plantedDate: today,
+          lastCompletedDate: null,
+          clicksByDate: {},
+          createdAt: Date.now() - 1000
+        }
+      ];
+    }
+
+    function loadGuestStateFromLocalStorage() {
+      try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          return {
+            plots: Array.isArray(parsed.plots) ? parsed.plots : [],
+            harvests: Array.isArray(parsed.harvests) ? parsed.harvests : [],
+            dailyLogs: parsed.dailyLogs && typeof parsed.dailyLogs === 'object' ? parsed.dailyLogs : {}
+          };
+        }
+      } catch (err) {
+        console.error('Read localStorage error:', err);
+      }
+      return null;
+    }
+
+    function saveGuestStateToLocalStorage() {
+      try {
+        localStorage.setItem(
+          LOCAL_STORAGE_KEY,
+          JSON.stringify({
+            plots: state.plots,
+            harvests: state.harvests,
+            dailyLogs: state.dailyLogs,
+            updatedAt: Date.now()
+          })
+        );
+      } catch (err) {
+        console.error('Write localStorage error:', err);
+      }
+    }
+
+    function clearGuestStateFromLocalStorage() {
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      } catch (err) {
+        console.error('Clear localStorage error:', err);
+      }
+    }
+
+    function showAuthModalError(message) {
+      const box = document.getElementById('auth-error-box');
+      if (!box) return;
+      if (!message) {
+        box.classList.add('hidden');
+        box.textContent = '';
+      } else {
+        box.textContent = message;
+        box.classList.remove('hidden');
+      }
+    }
+
+    function mapFirebaseErrorVietnamese(err) {
+      const code = err?.code || '';
+      if (code === 'auth/operation-not-allowed') {
+        return '⚠️ Phương thức đăng nhập Email/Mật khẩu chưa được bật. Bạn hãy mở Firebase Console → Build → Authentication → Sign-in method → bật "Email/Password" nhé!';
+      }
+      if (code === 'auth/unauthorized-domain') {
+        return '⚠️ Tên miền hiện tại chưa được cấp phép đăng nhập Google. Hãy dùng Email/Mật khẩu hoặc thêm tên miền này vào Firebase Console → Authentication → Settings → Authorized domains.';
+      }
+      if (code === 'permission-denied') {
+        return '⚠️ Firestore Database chưa bật chế độ Test Mode. Bạn hãy vào Firebase Console → Build → Firestore Database → Create database → chọn "Start in test mode" để cho phép đồng bộ dữ liệu!';
+      }
+      if (code === 'auth/email-already-in-use') {
+        return 'Email này đã được đăng ký rồi. Bạn hãy nhấn nút "Đăng nhập" nhé!';
+      }
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        return 'Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại nhé!';
+      }
+      if (code === 'auth/weak-password') {
+        return 'Mật khẩu quá ngắn, vui lòng đặt tối thiểu 6 ký tự.';
+      }
+      if (code === 'auth/popup-closed-by-user') {
+        return 'Bạn đã đóng cửa sổ đăng nhập Google.';
+      }
+      return `Lỗi kết nối (${code || 'unknown'}): ${err?.message || 'Vui lòng thử lại.'}`;
+    }
+
+    /**
+     * Builds an updated dailyLogs object for today without mutating unrelated dates
+     */
+    function buildUpdatedDailyLogs() {
+      const today = getTodayISO();
+      const nextLogs = { ...(state.dailyLogs || {}) };
+      const existingLog = nextLogs[today] || { habits: {} };
+      const habitsMap = { ...(existingLog.habits || {}) };
+
+      state.plots.forEach((plot) => {
+        const evalState = evaluatePlotState(plot, today);
+        if (!evalState.isDead) {
+          habitsMap[plot.id] = {
+            name: plot.name,
+            species: plot.species,
+            clicks: evalState.todayClicks,
+            target: evalState.dailyTarget,
+            completed: evalState.completedToday
+          };
+        }
+      });
+
+      const entries = Object.values(habitsMap);
+      nextLogs[today] = {
+        date: today,
+        totalHabits: entries.length,
+        completedHabits: entries.filter((h) => h.clicks >= h.target).length,
+        habits: habitsMap,
+        updatedAt: Date.now()
+      };
+
+      state.dailyLogs = nextLogs;
+      return nextLogs;
+    }
+
+    /**
+     * Persists current farm state either to Firestore (`users/${uid}/farm/state`) when logged in
+     * or to `localStorage` when browsing in guest/offline mode.
+     */
+    async function persistFarmState() {
+      const updatedDailyLogs = buildUpdatedDailyLogs();
+
+      if (db && state.user && state.userId) {
+        try {
+          const stateRef = doc(db, 'users', state.userId, 'farm', 'state');
+          await setDoc(
+            stateRef,
+            {
+              plots: state.plots,
+              harvests: state.harvests,
+              dailyLogs: updatedDailyLogs,
+              updatedAt: Date.now()
+            },
+            { merge: true }
+          );
+          updateSyncBadge(true, 'Đã đồng bộ đám mây');
+        } catch (err) {
+          console.error('Firestore persist error:', err);
+          const friendlyMsg = mapFirebaseErrorVietnamese(err);
+          showToast(friendlyMsg, 'error');
+          showAuthModalError(friendlyMsg);
+        }
+      } else {
+        saveGuestStateToLocalStorage();
+      }
+    }
+
+    /**
+     * Merges any local guest progress into the user's Firestore document on sign-in
+     * and attaches real-time `onSnapshot` sync across Laptop, iPad, and Phone.
+     */
+    async function connectUserCloudFarm(user) {
+      detachListeners();
+      if (!db || !user) return;
+
+      const stateRef = doc(db, 'users', user.uid, 'farm', 'state');
+      const localGuest = loadGuestStateFromLocalStorage();
+
+      try {
+        const snap = await getDoc(stateRef);
+        if (!snap.exists()) {
+          // First time signing into cloud: upload local guest garden or starter garden
+          const initialPlots =
+            localGuest && localGuest.plots.length > 0
+              ? localGuest.plots
+              : createDefaultStarterPlots();
+          const initialHarvests = localGuest ? localGuest.harvests : [];
+          const initialLogs = localGuest ? localGuest.dailyLogs : {};
+
+          await setDoc(stateRef, {
+            plots: initialPlots,
+            harvests: initialHarvests,
+            dailyLogs: initialLogs,
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          });
+
+          if (localGuest) clearGuestStateFromLocalStorage();
+        } else if (
+          localGuest &&
+          (localGuest.plots.length > 0 || localGuest.harvests.length > 0)
+        ) {
+          // Merge local guest items that aren't already in cloud state
+          const cloudData = snap.data() || {};
+          const cloudPlots = Array.isArray(cloudData.plots) ? cloudData.plots : [];
+          const cloudHarvests = Array.isArray(cloudData.harvests) ? cloudData.harvests : [];
+          const cloudLogs = cloudData.dailyLogs || {};
+
+          const existingPlotIds = new Set(cloudPlots.map((p) => p.id));
+          const mergedPlots = [...cloudPlots];
+          localGuest.plots.forEach((gp) => {
+            if (!existingPlotIds.has(gp.id)) mergedPlots.push(gp);
+          });
+
+          const existingHarvestIds = new Set(cloudHarvests.map((h) => h.id));
+          const mergedHarvests = [...cloudHarvests];
+          localGuest.harvests.forEach((gh) => {
+            if (!existingHarvestIds.has(gh.id)) mergedHarvests.push(gh);
+          });
+
+          const mergedLogs = { ...localGuest.dailyLogs, ...cloudLogs };
+
+          await setDoc(
+            stateRef,
+            {
+              plots: mergedPlots,
+              harvests: mergedHarvests,
+              dailyLogs: mergedLogs,
+              updatedAt: Date.now()
+            },
+            { merge: true }
+          );
+          clearGuestStateFromLocalStorage();
+          showToast('☁️ Đã gộp dữ liệu trên máy vào tài khoản đám mây!', 'success');
+        }
+      } catch (err) {
+        console.error('Initial cloud merge check error:', err);
+        const friendlyMsg = mapFirebaseErrorVietnamese(err);
+        showToast(friendlyMsg, 'error');
+        showAuthModalError(friendlyMsg);
+      }
+
+      // Real-time listener across all devices sharing this account
+      unsubFarmState = onSnapshot(
+        stateRef,
+        (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const plots = Array.isArray(data.plots) ? data.plots : [];
+            plots.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+            state.plots = plots;
+
+            const harvests = Array.isArray(data.harvests) ? data.harvests : [];
+            harvests.sort((a, b) => (b.harvestedAt || 0) - (a.harvestedAt || 0));
+            state.harvests = harvests;
+
+            state.dailyLogs =
+              data.dailyLogs && typeof data.dailyLogs === 'object' ? data.dailyLogs : {};
+          }
+          state.isCloudConnected = true;
+          updateSyncBadge(true, 'Đã đồng bộ đa thiết bị');
+          showAuthModalError('');
+          renderAll();
+        },
+        (error) => {
+          console.error('onSnapshot real-time sync error:', error);
+          const friendlyMsg = mapFirebaseErrorVietnamese(error);
+          updateSyncBadge(false, 'Lỗi quyền Firestore');
+          showToast(friendlyMsg, 'error');
+          showAuthModalError(friendlyMsg);
+        }
+      );
+    }
+
+    function activateGuestMode() {
+      detachListeners();
+      state.user = null;
+      state.userId = null;
+      state.isCloudConnected = false;
+
+      const localGuest = loadGuestStateFromLocalStorage();
+      if (localGuest && (localGuest.plots.length > 0 || localGuest.harvests.length > 0)) {
+        state.plots = localGuest.plots;
+        state.harvests = localGuest.harvests;
+        state.dailyLogs = localGuest.dailyLogs;
+      } else {
+        state.plots = createDefaultStarterPlots();
+        state.harvests = [];
+        state.dailyLogs = {};
+        saveGuestStateToLocalStorage();
+      }
+
+      updateAuthUI(null);
+      renderAll();
+    }
+
+    /**
+     * Initialize Firebase App, Auth, and Firestore using user's exact config
+     */
+    function initFirebase() {
+      try {
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            state.user = user;
+            state.userId = user.uid;
+            updateAuthUI(user);
+            await connectUserCloudFarm(user);
+          } else {
+            activateGuestMode();
+          }
+        });
+      } catch (err) {
+        console.error('Firebase init failed, switching to local offline mode:', err);
+        activateGuestMode();
+      }
+    }
+
+    function updateSyncBadge(connected, labelText) {
+      const dot = document.getElementById('sync-dot');
+      const label = document.getElementById('sync-label');
+      dot.className = connected
+        ? 'w-2.5 h-2.5 rounded-full bg-emerald-500'
+        : 'w-2.5 h-2.5 rounded-full bg-amber-400';
+      label.textContent = labelText;
+    }
+
+    function updateAuthUI(user) {
+      const btnText = document.getElementById('account-btn-text');
+      const avatar = document.getElementById('account-avatar');
+      const modalBadge = document.getElementById('modal-auth-badge');
+      const emailRow = document.getElementById('modal-user-email-row');
+      const emailSpan = document.getElementById('modal-user-email');
+      const uidCode = document.getElementById('modal-user-uid');
+      const signInSec = document.getElementById('auth-signin-section');
+      const signOutSec = document.getElementById('auth-signout-section');
+
+      if (user) {
+        const displayName = user.displayName || (user.email ? user.email.split('@')[0] : 'Nông dân');
+        uidCode.textContent = user.uid;
+        btnText.textContent = displayName;
+        avatar.textContent = '🌟';
+        updateSyncBadge(true, 'Đã đồng bộ đa thiết bị');
+        modalBadge.textContent = 'Đã kết nối đám mây';
+        modalBadge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#95d5b2] text-[#1b4332] border border-[#2d6a4f]';
+        emailRow.classList.remove('hidden');
+        emailSpan.textContent = user.email || displayName;
+        signInSec.classList.add('hidden');
+        signOutSec.classList.remove('hidden');
+      } else {
+        uidCode.textContent = 'Chưa đăng nhập (Đang lưu cục bộ)';
+        btnText.textContent = 'Đồng bộ thiết bị';
+        avatar.textContent = '🧑‍🌾';
+        updateSyncBadge(false, 'Chế độ khách (Lưu trên máy)');
+        modalBadge.textContent = 'Chế độ khách (1 thiết bị)';
+        modalBadge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-[#ffd166] text-[#432818] border border-[#8c583a]';
+        emailRow.classList.add('hidden');
+        signInSec.classList.remove('hidden');
+        signOutSec.classList.add('hidden');
+      }
+    }
+
+    // =========================================================================
+    // 5. CORE FARM ACTIONS (WATER CLICK, UNDO, HARVEST, PLANT, EDIT, DELETE)
+    // =========================================================================
+
+    /**
+     * Single-click handler on a plant plot: increments today's clicks by +1
+     */
+    async function handleWaterPlotClick(plotId, clientX, clientY) {
+      const plot = state.plots.find((p) => p.id === plotId);
+      if (!plot) return;
+
+      const today = getTodayISO();
+      const evalBefore = evaluatePlotState(plot, today);
+
+      if (evalBefore.isDead) {
+        showToast('Cây đã chết sau 7 ngày bỏ quên. Hãy dọn ô đất để trồng hạt mới nhé!', 'warning');
+        return;
+      }
+
+      if (evalBefore.completedToday) {
+        playWaterSplashSound();
+        spawnFloatingParticle(clientX, clientY, 'Đã đủ hôm nay! ✨', '#3a7d58');
+        return;
+      }
+
+      const newTodayClicks = evalBefore.todayClicks + 1;
+      const reachedTargetNow = newTodayClicks >= evalBefore.dailyTarget;
+
+      const updatedClicksByDate = {
+        ...(plot.clicksByDate || {}),
+        [today]: newTodayClicks
+      };
+
+      let updatedGrowthDays = evalBefore.growthDays;
+      let updatedLastCompletedDate = plot.lastCompletedDate || null;
+
+      if (reachedTargetNow && !evalBefore.completedToday) {
+        updatedGrowthDays += 1;
+        updatedLastCompletedDate = today;
+        playDailyCompleteSound();
+        spawnFloatingParticle(clientX, clientY, `Hoàn thành! +1 ngày 🌱`, '#2d6a4f');
+      } else {
+        playWaterSplashSound();
+        spawnFloatingParticle(clientX, clientY, `+1 💧 (${newTodayClicks}/${evalBefore.dailyTarget})`, '#0077b6');
+      }
+
+      // Bounce animation on the plant sprite
+      const spriteEl = document.querySelector(`[data-plot-sprite="${plotId}"]`);
+      if (spriteEl) {
+        spriteEl.classList.remove('animate-water-bounce');
+        void spriteEl.offsetWidth;
+        spriteEl.classList.add('animate-water-bounce');
+      }
+
+      // Update local state immediately for zero-latency responsiveness
+      plot.clicksByDate = updatedClicksByDate;
+      plot.growthDays = updatedGrowthDays;
+      plot.lastCompletedDate = updatedLastCompletedDate;
+      renderAll();
+
+      await persistFarmState();
+    }
+
+    /**
+     * Undo -1 click today in case of accidental tap
+     */
+    async function handleUndoClick(plotId) {
+      const plot = state.plots.find((p) => p.id === plotId);
+      if (!plot) return;
+
+      const today = getTodayISO();
+      const evalBefore = evaluatePlotState(plot, today);
+      if (evalBefore.todayClicks <= 0) return;
+
+      const newTodayClicks = evalBefore.todayClicks - 1;
+      const updatedClicksByDate = {
+        ...(plot.clicksByDate || {}),
+        [today]: newTodayClicks
+      };
+
+      let updatedGrowthDays = evalBefore.growthDays;
+      let updatedLastCompletedDate = plot.lastCompletedDate || null;
+
+      if (evalBefore.completedToday && newTodayClicks < evalBefore.dailyTarget) {
+        updatedGrowthDays = Math.max(0, updatedGrowthDays - 1);
+        if (updatedLastCompletedDate === today) {
+          const pastDates = Object.keys(updatedClicksByDate)
+            .filter((d) => d < today && updatedClicksByDate[d] >= evalBefore.dailyTarget)
+            .sort();
+          updatedLastCompletedDate = pastDates.length > 0 ? pastDates[pastDates.length - 1] : null;
+        }
+      }
+
+      plot.clicksByDate = updatedClicksByDate;
+      plot.growthDays = updatedGrowthDays;
+      plot.lastCompletedDate = updatedLastCompletedDate;
+      renderAll();
+      showToast('Đã hoàn tác 1 lần nhấp (-1)', 'info');
+
+      await persistFarmState();
+    }
+
+    /**
+     * Harvests a mature plant into Kho Thu Hoạch
+     */
+    async function handleHarvestPlot(plotId) {
+      const plot = state.plots.find((p) => p.id === plotId);
+      if (!plot) return;
+
+      const today = getTodayISO();
+      const evalState = evaluatePlotState(plot, today);
+      if (!evalState.isHarvestable) return;
+
+      playHarvestFanfareSound();
+
+      const harvestEntry = {
+        id: 'harvest-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        name: plot.name,
+        species: plot.species,
+        dailyTarget: evalState.dailyTarget,
+        targetDays: evalState.targetDays,
+        grownDays: evalState.growthDays,
+        plantedDate: plot.plantedDate || today,
+        harvestedDate: today,
+        harvestedAt: Date.now()
+      };
+
+      state.harvests.unshift(harvestEntry);
+      state.plots = state.plots.filter((p) => p.id !== plotId);
+      renderAll();
+      showToast(`🎉 Thu hoạch thành công "${plot.name}" vào Kho!`, 'success');
+
+      await persistFarmState();
+    }
+
+    /**
+     * Replants a fresh seed of a harvested or dead habit
+     */
+    async function handleReplantHabit(name, species, dailyTarget, targetDays, oldDeadPlotId = null) {
+      const today = getTodayISO();
+      const newPlotData = {
+        id: 'plot-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        name,
+        species,
+        dailyTarget: Number(dailyTarget || 1),
+        targetDays: Number(targetDays || 7),
+        growthDays: 0,
+        plantedDate: today,
+        lastCompletedDate: null,
+        clicksByDate: {},
+        createdAt: Date.now()
+      };
+
+      playWaterSplashSound();
+
+      if (oldDeadPlotId) {
+        state.plots = state.plots.filter((p) => p.id !== oldDeadPlotId);
+      }
+      state.plots.push(newPlotData);
+      switchTab('farm');
+      renderAll();
+      showToast(`🌱 Đã gieo lại hạt "${name}" vào vườn!`, 'success');
+
+      await persistFarmState();
+    }
+
+    /**
+     * Removes a plot (used for dead plant cleanup or edit delete)
+     */
+    async function handleDeletePlot(plotId) {
+      state.plots = state.plots.filter((p) => p.id !== plotId);
+      renderAll();
+      showToast('Đã dọn sạch ô đất.', 'info');
+
+      await persistFarmState();
+    }
+
+    // =========================================================================
+    // 6. UI RENDERING FUNCTIONS (FARM, HARVEST BARN, CALENDAR)
+    // =========================================================================
+    function renderAll() {
+      const today = getTodayISO();
+      document.getElementById('header-current-date').textContent = formatDateVN(today);
+      document.getElementById('tab-badge-farm').textContent = state.plots.length;
+      document.getElementById('tab-badge-barn').textContent = state.harvests.length;
+
+      renderFarmView(today);
+      renderBarnView();
+      renderCalendarView(today);
+    }
+
+    function renderFarmView(today) {
+      const grid = document.getElementById('farm-plots-grid');
+      const livingPlots = state.plots.filter((p) => !evaluatePlotState(p, today).isDead);
+      const completedCount = livingPlots.filter((p) => evaluatePlotState(p, today).completedToday).length;
+      const totalLiving = livingPlots.length;
+      const pct = totalLiving > 0 ? Math.round((completedCount / totalLiving) * 100) : 0;
+
+      // Update summary banner
+      document.getElementById('daily-summary-fraction').textContent = `${completedCount}/${totalLiving} thói quen hoàn thành`;
+      document.getElementById('daily-summary-bar').style.width = `${pct}%`;
+      document.getElementById('daily-summary-percent').textContent = `${pct}%`;
+      document.getElementById('stat-total-harvested').textContent = state.harvests.length;
+
+      // Best current streak across active plots
+      let bestStreak = 0;
+      state.plots.forEach((p) => {
+        const ev = evaluatePlotState(p, today);
+        if (!ev.isDead && ev.growthDays > bestStreak) bestStreak = ev.growthDays;
+      });
+      document.getElementById('stat-best-streak').textContent = bestStreak;
+
+      const encouragement = document.getElementById('daily-encouragement');
+      if (totalLiving === 0) {
+        encouragement.textContent = 'Khu vườn đang trống! Hãy nhấn "Gieo hạt mới" để bắt đầu trồng thói quen đầu tiên.';
+      } else if (completedCount === totalLiving) {
+        encouragement.textContent = '🌟 Tuyệt vời! Tất cả cây trong vườn hôm nay đều đã được tưới đủ nước và tươi tốt!';
+      } else {
+        encouragement.textContent = `Còn ${totalLiving - completedCount} cây nữa đang chờ bạn chăm sóc hôm nay. Chạm vào ô cây để tưới nhé!`;
+      }
+
+      // Build Plot Cards HTML
+      let cardsHtml = '';
+
+      state.plots.forEach((plot) => {
+        const ev = evaluatePlotState(plot, today);
+        const species = PLANT_SPECIES[plot.species] || PLANT_SPECIES.strawberry;
+        const growthPct = Math.min(100, Math.round((ev.growthDays / ev.targetDays) * 100));
+        const dailyPct = Math.min(100, Math.round((ev.todayClicks / ev.dailyTarget) * 100));
+
+        // Status banner & soil class based on health/wilting/harvestable
+        let statusPillHtml = '';
+        let soilClass = 'soil-patch';
+        let cardExtraClass = '';
+
+        if (ev.isDead) {
+          soilClass = 'soil-patch dead-soil';
+          cardExtraClass = 'plot-dead opacity-90';
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-stone-200 text-stone-700 border border-stone-400">
+              🥀 Cây đã chết sau 7 ngày bỏ quên
+            </span>
+          `;
+        } else if (ev.isHarvestable) {
+          soilClass = 'soil-patch watered';
+          cardExtraClass = 'harvest-glow';
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#ffd166] text-[#432818] border border-[#8c583a]">
+              ✨ Sẵn sàng thu hoạch!
+            </span>
+          `;
+        } else if (ev.missedDays >= 4) {
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#ffccd5] text-[#9e1936] border border-[#e63946]">
+              🆘 Héo nặng - Quên ${ev.missedDays}/7 ngày
+            </span>
+          `;
+        } else if (ev.missedDays >= 2) {
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#ffe5b4] text-[#9c4221] border border-[#f4a261]">
+              🍂 Đang héo - Quên ${ev.missedDays}/7 ngày
+            </span>
+          `;
+        } else if (ev.missedDays === 1) {
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#fef3c7] text-[#92400e] border border-[#f59e0b]">
+              💧 Héo nhẹ - Quên 1/7 ngày
+            </span>
+          `;
+        } else if (ev.completedToday) {
+          soilClass = 'soil-patch watered';
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#d8f3dc] text-[#1b4332] border border-[#52b788]">
+              🌿 Tươi tốt • Đã tưới đủ
+            </span>
+          `;
+        } else {
+          statusPillHtml = `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-[#e0f2fe] text-[#075985] border border-[#7dd3fc]">
+              🌱 Chờ chăm sóc hôm nay
+            </span>
+          `;
+        }
+
+        // Daily click droplets indicator
+        let dropletsHtml = '';
+        if (ev.dailyTarget <= 6) {
+          for (let i = 0; i < ev.dailyTarget; i++) {
+            const filled = i < ev.todayClicks;
+            dropletsHtml += `<span class="text-sm transition-transform ${filled ? 'scale-110 opacity-100' : 'opacity-30 grayscale'}">💧</span>`;
+          }
+        } else {
+          dropletsHtml = `<span class="font-pixel text-xs font-bold text-[#0077b6]">💧 ${ev.todayClicks}/${ev.dailyTarget}</span>`;
+        }
+
+        cardsHtml += `
+          <article
+            data-plot-card="${plot.id}"
+            class="farm-plot p-4 flex flex-col justify-between relative ${cardExtraClass}"
+          >
+            <!-- Top Row: Species Tag + Quick Controls (-1 Undo & Edit) -->
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-extrabold border-2 text-[#432818]"
+                style="background-color: ${species.badgeBg}; border-color: ${species.badgeBorder};"
+              >
+                ${species.name} • ${ev.stageLabel}
+              </span>
+
+              <div class="flex items-center gap-1" data-no-water="true">
+                ${
+                  !ev.isDead && ev.todayClicks > 0
+                    ? `<button
+                        type="button"
+                        data-action="undo"
+                        data-id="${plot.id}"
+                        title="Hoàn tác 1 lần nhấp (-1)"
+                        class="px-2 py-1 rounded-lg bg-[#faedcd] hover:bg-[#ffd166] border-2 border-[#8c583a] font-pixel text-[11px] font-bold text-[#582f0e] active:scale-95"
+                      >-1</button>`
+                    : ''
+                }
+                <button
+                  type="button"
+                  data-action="edit"
+                  data-id="${plot.id}"
+                  title="Cài đặt thói quen"
+                  class="p-1.5 rounded-lg bg-[#faedcd] hover:bg-[#e6ccb2] border-2 border-[#8c583a] text-xs font-bold text-[#582f0e] active:scale-95"
+                >⚙️</button>
+              </div>
+            </div>
+
+            <!-- Habit Title -->
+            <h3 class="font-heading text-base sm:text-lg font-black text-[#432818] leading-snug mb-1.5 line-clamp-1" title="${escapeHtml(plot.name)}">
+              ${escapeHtml(plot.name)}
+            </h3>
+
+            <!-- Health / Wilting Status Badge -->
+            <div class="mb-3">
+              ${statusPillHtml}
+            </div>
+
+            <!-- Soil Patch & Pixel Plant Sprite -->
+            <div class="${soilClass} py-3 px-2 flex flex-col items-center justify-center relative mb-3 min-h-[124px]">
+              <div data-plot-sprite="${plot.id}" class="${!ev.isDead ? 'plant-sway' : ''}">
+                ${renderPlantSVG(plot.species, ev.stage, ev.missedDays, 88)}
+              </div>
+              ${
+                !ev.isDead && !ev.completedToday
+                  ? `<span class="mt-1 px-2.5 py-0.5 rounded-full bg-[#fffdf7]/90 border border-[#8c583a] text-[11px] font-extrabold text-[#582f0e] shadow-sm">
+                      👆 Chạm để chăm (+1)
+                    </span>`
+                  : ''
+              }
+            </div>
+
+            <!-- Bottom Section: Daily Click Progress & Overall Growth Days -->
+            <div class="space-y-2.5" data-no-water="${ev.isHarvestable || ev.isDead ? 'true' : 'false'}">
+              ${
+                ev.isDead
+                  ? `
+                    <div class="grid grid-cols-2 gap-2 pt-1" data-no-water="true">
+                      <button
+                        type="button"
+                        data-action="replant-dead"
+                        data-id="${plot.id}"
+                        class="btn-mint py-2 px-2 text-xs font-extrabold"
+                      >
+                        🌱 Trồng lại
+                      </button>
+                      <button
+                        type="button"
+                        data-action="clean-dead"
+                        data-id="${plot.id}"
+                        class="btn-pink py-2 px-2 text-xs font-extrabold"
+                      >
+                        🧹 Dọn ô đất
+                      </button>
+                    </div>
+                  `
+                  : ev.isHarvestable
+                  ? `
+                    <button
+                      type="button"
+                      data-action="harvest"
+                      data-id="${plot.id}"
+                      data-no-water="true"
+                      class="w-full btn-wood py-2.5 px-3 text-sm font-black flex items-center justify-center gap-1.5 animate-bounce"
+                    >
+                      <span>🧺</span> Thu hoạch ngay!
+                    </button>
+                  `
+                  : `
+                    <!-- Today's Click Requirement Bar -->
+                    <div class="bg-[#faedcd]/80 border-2 border-[#d4a373] rounded-xl p-2">
+                      <div class="flex items-center justify-between text-xs font-extrabold text-[#432818] mb-1">
+                        <span>Hôm nay:</span>
+                        <span class="font-pixel text-xs ${ev.completedToday ? 'text-[#2d6a4f]' : 'text-[#8c583a]'}">
+                          ${ev.todayClicks}/${ev.dailyTarget} lần
+                        </span>
+                      </div>
+                      <div class="flex items-center justify-between gap-1">
+                        <div class="flex items-center flex-wrap gap-0.5">${dropletsHtml}</div>
+                        <span class="font-pixel text-[11px] font-bold text-[#6f4518]">${dailyPct}%</span>
+                      </div>
+                    </div>
+                  `
+              }
+
+              <!-- Overall Growth Days Progress -->
+              <div>
+                <div class="flex items-center justify-between text-[11px] font-extrabold text-[#6f4518] mb-1">
+                  <span>Độ lớn cây:</span>
+                  <span class="font-pixel">${ev.growthDays}/${ev.targetDays} ngày (${growthPct}%)</span>
+                </div>
+                <div class="w-full h-2.5 bg-[#faedcd] border-2 border-[#8c583a] rounded-full overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-300 ${ev.isDead ? 'bg-stone-400' : 'bg-[#52b788]'}"
+                    style="width: ${growthPct}%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        `;
+      });
+
+      // Add "+ Gieo hạt mới" empty plot card at the end of the garden grid
+      cardsHtml += `
+        <button
+          type="button"
+          id="btn-plot-add-card"
+          class="min-h-[260px] rounded-[20px] border-4 border-dashed border-[#8c583a]/65 bg-[#fffdf7]/65 hover:bg-[#fffdf7] hover:border-[#8c583a] p-6 flex flex-col items-center justify-center text-center gap-3 transition group"
+        >
+          <div class="w-16 h-16 rounded-2xl bg-[#d8f3dc] border-3 border-[#52b788] flex items-center justify-center text-3xl group-hover:scale-110 transition">
+            🌱
+          </div>
+          <div>
+            <div class="font-heading text-base font-black text-[#432818]">+ Gieo hạt giống mới</div>
+            <p class="text-xs font-bold text-[#7f4f24] mt-1">
+              Thêm một thói quen mới vào khu vườn của bạn
+            </p>
+          </div>
+        </button>
+      `;
+
+      grid.innerHTML = cardsHtml;
+    }
+
+    function renderBarnView() {
+      document.getElementById('barn-total-count').textContent = state.harvests.length;
+
+      // Count by species
+      const counts = {};
+      Object.keys(PLANT_SPECIES).forEach((k) => { counts[k] = 0; });
+      state.harvests.forEach((h) => {
+        if (counts[h.species] !== undefined) counts[h.species] += 1;
+        else counts[h.species] = 1;
+      });
+
+      // Species summary shelf
+      const shelfEl = document.getElementById('barn-species-shelf');
+      shelfEl.innerHTML = Object.values(PLANT_SPECIES)
+        .map((sp) => {
+          const count = counts[sp.id] || 0;
+          return `
+            <div class="cream-box p-2.5 flex flex-col items-center text-center ${count === 0 ? 'opacity-60' : ''}">
+              <div>${renderPlantSVG(sp.id, 5, 0, 44)}</div>
+              <div class="text-xs font-extrabold text-[#432818] mt-1 line-clamp-1">${sp.name}</div>
+              <span class="font-pixel text-xs font-bold px-2 py-0.5 mt-1 rounded-full bg-[#faedcd] border border-[#8c583a] text-[#582f0e]">
+                ×${count}
+              </span>
+            </div>
+          `;
+        })
+        .join('');
+
+      // Filter pills
+      const filterBar = document.getElementById('barn-filter-bar');
+      const filterOptions = [{ id: 'all', label: `Tất cả (${state.harvests.length})` }].concat(
+        Object.values(PLANT_SPECIES).map((sp) => ({
+          id: sp.id,
+          label: `${sp.name} (${counts[sp.id] || 0})`
+        }))
+      );
+
+      filterBar.innerHTML = filterOptions
+        .map((opt) => {
+          const active = state.barnFilter === opt.id;
+          return `
+            <button
+              type="button"
+              data-barn-filter="${opt.id}"
+              class="px-3 py-1.5 rounded-full text-xs font-extrabold border-2 transition ${
+                active
+                  ? 'bg-[#ffd166] border-[#8c583a] text-[#432818] shadow-sm'
+                  : 'bg-[#fffdf7] border-[#d4a373] text-[#6f4518] hover:bg-[#faedcd]'
+              }"
+            >
+              ${opt.label}
+            </button>
+          `;
+        })
+        .join('');
+
+      // Harvested cards
+      const filtered =
+        state.barnFilter === 'all'
+          ? state.harvests
+          : state.harvests.filter((h) => h.species === state.barnFilter);
+
+      const harvestGrid = document.getElementById('barn-harvest-grid');
+      if (filtered.length === 0) {
+        harvestGrid.innerHTML = `
+          <div class="col-span-full cream-box p-8 text-center space-y-2">
+            <div class="text-4xl">🧺</div>
+            <h3 class="font-heading text-lg font-black text-[#432818]">Kho thu hoạch chưa có nông sản nào</h3>
+            <p class="text-xs sm:text-sm font-bold text-[#7f4f24] max-w-md mx-auto">
+              Hãy chăm sóc cây trong Khu Vườn đủ số ngày mục tiêu để thu hoạch và trưng bày thành quả tại đây nhé!
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      harvestGrid.innerHTML = filtered
+        .map((item) => {
+          const sp = PLANT_SPECIES[item.species] || PLANT_SPECIES.strawberry;
+          return `
+            <div class="cream-box p-4 flex flex-col justify-between gap-3">
+              <div class="flex items-center gap-3.5">
+                <div class="w-20 h-20 rounded-2xl bg-[#faedcd] border-3 border-[#d4a373] flex items-center justify-center shrink-0">
+                  ${renderPlantSVG(item.species, 5, 0, 64)}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <span
+                    class="inline-block px-2 py-0.5 rounded-md text-[11px] font-extrabold border mb-1"
+                    style="background-color: ${sp.badgeBg}; border-color: ${sp.badgeBorder};"
+                  >
+                    ${sp.name}
+                  </span>
+                  <h4 class="font-heading text-base font-black text-[#432818] truncate" title="${escapeHtml(item.name)}">
+                    ${escapeHtml(item.name)}
+                  </h4>
+                  <div class="text-xs font-bold text-[#6f4518] mt-1 space-y-0.5">
+                    <div>🌱 Gieo: ${formatDateVN(item.plantedDate)}</div>
+                    <div>🧺 Thu hoạch: ${formatDateVN(item.harvestedDate)}</div>
+                    <div>✨ Tích lũy: <strong>${item.grownDays} ngày</strong> (${item.dailyTarget} lần/ngày)</div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                data-replant-harvest="${item.id}"
+                class="w-full btn-mint py-2 px-3 text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              >
+                <span>🌱</span> Trồng lại thói quen này
+              </button>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    /**
+     * Computes progress stats for any calendar date `dateISO` by merging `dailyLogs` and live `plots`
+     */
+    function getDateProgressSummary(dateISO, todayISO) {
+      const storedLog = state.dailyLogs[dateISO];
+      const habitsMap = {};
+
+      if (storedLog && storedLog.habits) {
+        Object.entries(storedLog.habits).forEach(([id, h]) => {
+          habitsMap[id] = { ...h };
+        });
+      }
+
+      // If date is today or has clicks recorded in active plots, merge live data
+      state.plots.forEach((plot) => {
+        const clicksForDate = Number((plot.clicksByDate || {})[dateISO] || 0);
+        const dailyTarget = Math.max(1, Number(plot.dailyTarget || 1));
+        if (dateISO === todayISO) {
+          const ev = evaluatePlotState(plot, todayISO);
+          if (!ev.isDead) {
+            habitsMap[plot.id] = {
+              name: plot.name,
+              species: plot.species,
+              clicks: ev.todayClicks,
+              target: dailyTarget
+            };
+          }
+        } else if (clicksForDate > 0) {
+          habitsMap[plot.id] = {
+            name: plot.name,
+            species: plot.species,
+            clicks: clicksForDate,
+            target: dailyTarget
+          };
+        }
+      });
+
+      const list = Object.values(habitsMap);
+      const total = list.length;
+      const completed = list.filter((h) => Number(h.clicks || 0) >= Number(h.target || 1)).length;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      return { total, completed, percent, habits: list };
+    }
+
+    function renderCalendarView(todayISO) {
+      const year = state.calendarYear;
+      const month = state.calendarMonth; // 0..11
+      const monthNames = [
+        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+      ];
+      document.getElementById('calendar-month-title').textContent = `${monthNames[month]}, ${year}`;
+
+      const firstDay = new Date(year, month, 1);
+      // Convert Sunday=0..Saturday=6 into Monday=0..Sunday=6
+      const startWeekday = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+      let activeDaysCount = 0;
+      let perfectDaysCount = 0;
+      let sumPct = 0;
+      let trackedDaysCount = 0;
+
+      let cellsHtml = '';
+      // Empty leading slots
+      for (let i = 0; i < startWeekday; i++) {
+        cellsHtml += `<div class="h-16 sm:h-20 rounded-xl bg-[#faedcd]/40 border-2 border-transparent"></div>`;
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateISO = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const summary = getDateProgressSummary(dateISO, todayISO);
+        const isToday = dateISO === todayISO;
+        const isSelected = dateISO === state.selectedCalendarDate;
+
+        if (summary.total > 0) {
+          trackedDaysCount += 1;
+          sumPct += summary.percent;
+          if (summary.completed > 0) activeDaysCount += 1;
+          if (summary.percent === 100) perfectDaysCount += 1;
+        }
+
+        // Color fill intensity based on completion %
+        let cellBg = 'bg-[#fffdf7] border-[#d4a373]';
+        if (summary.total > 0 && summary.percent === 100) {
+          cellBg = 'bg-[#95d5b2] border-[#2d6a4f]';
+        } else if (summary.percent >= 50) {
+          cellBg = 'bg-[#d8f3dc] border-[#52b788]';
+        } else if (summary.percent > 0) {
+          cellBg = 'bg-[#fef3c7] border-[#f59e0b]';
+        }
+
+        const selectedRing = isSelected ? 'ring-4 ring-[#ff8fab] scale-[1.03] z-10' : '';
+        const todayDot = isToday ? '<span class="w-2 h-2 rounded-full bg-[#e63946] inline-block"></span>' : '';
+
+        cellsHtml += `
+          <button
+            type="button"
+            data-cal-date="${dateISO}"
+            class="h-16 sm:h-20 rounded-xl border-2 ${cellBg} ${selectedRing} p-1.5 flex flex-col justify-between items-center transition hover:brightness-95 relative"
+          >
+            <div class="w-full flex items-center justify-between text-xs font-black text-[#432818]">
+              <span>${day}</span>
+              ${todayDot}
+            </div>
+            ${
+              summary.total > 0
+                ? `<div class="font-pixel text-[10px] sm:text-xs font-bold text-[#1b4332] leading-none">
+                    ${summary.completed}/${summary.total} ${summary.percent === 100 ? '⭐' : ''}
+                  </div>`
+                : `<div class="text-[10px] text-[#a47148]/60 font-bold">--</div>`
+            }
+          </button>
+        `;
+      }
+
+      document.getElementById('calendar-days-grid').innerHTML = cellsHtml;
+      document.getElementById('cal-stat-active-days').textContent = activeDaysCount;
+      document.getElementById('cal-stat-perfect-days').textContent = `${perfectDaysCount} ⭐`;
+      document.getElementById('cal-stat-avg-rate').textContent =
+        trackedDaysCount > 0 ? `${Math.round(sumPct / trackedDaysCount)}%` : '0%';
+
+      // Render Selected Day Detail Panel
+      renderSelectedDayDetails(state.selectedCalendarDate, todayISO);
+    }
+
+    function renderSelectedDayDetails(dateISO, todayISO) {
+      document.getElementById('detail-date-label').textContent = formatDateVN(dateISO);
+      const summary = getDateProgressSummary(dateISO, todayISO);
+
+      document.getElementById('detail-date-ratio').textContent =
+        `${summary.completed}/${summary.total} (${summary.percent}%)`;
+      document.getElementById('detail-date-bar').style.width = `${summary.percent}%`;
+
+      const listEl = document.getElementById('detail-habits-list');
+      if (summary.total === 0) {
+        listEl.innerHTML = `
+          <div class="cream-box p-6 text-center text-xs sm:text-sm font-bold text-[#7f4f24]">
+            Không có dữ liệu chăm cây vào ngày ${formatDateVN(dateISO)}.
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = summary.habits
+        .map((h) => {
+          const done = Number(h.clicks || 0) >= Number(h.target || 1);
+          return `
+            <div class="cream-box p-3 flex items-center justify-between gap-2.5 ${done ? 'border-[#52b788] bg-[#f4fbf7]' : ''}">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="shrink-0">${renderPlantSVG(h.species, done ? 5 : 3, 0, 36)}</div>
+                <div class="min-w-0">
+                  <div class="font-heading text-sm font-black text-[#432818] truncate">${escapeHtml(h.name)}</div>
+                  <div class="text-xs font-bold text-[#6f4518]">
+                    Đã thực hiện: <span class="font-pixel">${h.clicks}/${h.target}</span> lần
+                  </div>
+                </div>
+              </div>
+              <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-extrabold border ${
+                done
+                  ? 'bg-[#95d5b2] text-[#1b4332] border-[#2d6a4f]'
+                  : 'bg-[#fef3c7] text-[#92400e] border-[#f59e0b]'
+              }">
+                ${done ? 'Hoàn thành ✓' : 'Chưa đủ'}
+              </span>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    // =========================================================================
+    // 7. MODALS, NOTIFICATIONS, PARTICLE EFFECTS & EVENT LISTENERS
+    // =========================================================================
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function spawnFloatingParticle(x, y, text, colorHex) {
+      const el = document.createElement('div');
+      el.className = 'floating-particle font-heading font-black text-sm sm:text-base';
+      el.style.left = `${x || window.innerWidth / 2}px`;
+      el.style.top = `${(y || window.innerHeight / 2) - 16}px`;
+      el.style.color = colorHex || '#2d6a4f';
+      el.textContent = text;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 900);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const colors = {
+        success: 'bg-[#d8f3dc] border-[#2d6a4f] text-[#1b4332]',
+        warning: 'bg-[#fef3c7] border-[#d97706] text-[#78350f]',
+        error: 'bg-[#ffe5ec] border-[#e63946] text-[#800f2f]',
+        info: 'bg-[#fffdf7] border-[#8c583a] text-[#432818]'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto px-4 py-2.5 rounded-2xl border-3 font-extrabold text-xs sm:text-sm shadow-lg transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(8px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 2800);
+    }
+
+    function showCustomConfirm({ icon = '🌿', title, message, onConfirm }) {
+      const modal = document.getElementById('modal-confirm');
+      document.getElementById('confirm-icon').textContent = icon;
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      const cleanup = () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      };
+
+      const okBtn = document.getElementById('btn-confirm-ok');
+      const cancelBtn = document.getElementById('btn-confirm-cancel');
+      okBtn.onclick = () => { cleanup(); onConfirm(); };
+      cancelBtn.onclick = cleanup;
+    }
+
+    function switchTab(tabId) {
+      state.activeTab = tabId;
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        const isMatch = btn.dataset.tab === tabId;
+        if (isMatch) {
+          btn.classList.add('bg-[#fffdf7]', 'text-[#432818]', 'font-black');
+          btn.classList.remove('bg-[#e6ccb2]', 'text-[#582f0e]', 'font-extrabold');
+        } else {
+          btn.classList.remove('bg-[#fffdf7]', 'text-[#432818]', 'font-black');
+          btn.classList.add('bg-[#e6ccb2]', 'text-[#582f0e]', 'font-extrabold');
+        }
+      });
+
+      document.getElementById('view-farm').classList.toggle('hidden', tabId !== 'farm');
+      document.getElementById('view-barn').classList.toggle('hidden', tabId !== 'barn');
+      document.getElementById('view-calendar').classList.toggle('hidden', tabId !== 'calendar');
+
+      if (tabId === 'calendar') {
+        state.selectedCalendarDate = getTodayISO();
+        renderCalendarView(getTodayISO());
+      }
+    }
+
+    function renderSeedSpeciesGrid() {
+      const grid = document.getElementById('seed-species-grid');
+      grid.innerHTML = Object.values(PLANT_SPECIES)
+        .map((sp) => {
+          const selected = state.selectedPlantSpecies === sp.id;
+          return `
+            <button
+              type="button"
+              data-select-species="${sp.id}"
+              class="p-2 rounded-xl border-3 flex flex-col items-center text-center transition ${
+                selected
+                  ? 'bg-[#d8f3dc] border-[#2d6a4f] scale-105 shadow-sm'
+                  : 'bg-[#fffdf7] border-[#d4a373] hover:bg-[#faedcd]'
+              }"
+            >
+              ${renderPlantSVG(sp.id, 5, 0, 42)}
+              <span class="text-[11px] font-extrabold text-[#432818] mt-1 leading-tight">${sp.name}</span>
+            </button>
+          `;
+        })
+        .join('');
+    }
+
+    function openSeedModal(editPlot = null) {
+      const modal = document.getElementById('modal-seed');
+      const title = document.getElementById('modal-seed-title');
+      const editIdInput = document.getElementById('seed-edit-id');
+      const nameInput = document.getElementById('input-habit-name');
+      const clicksInput = document.getElementById('input-daily-target');
+      const daysInput = document.getElementById('input-target-days');
+      const deleteBtn = document.getElementById('btn-delete-plot');
+      const saveBtn = document.getElementById('btn-save-seed');
+
+      if (editPlot) {
+        title.innerHTML = '<span>⚙️</span> Chỉnh Sửa Thói Quen';
+        editIdInput.value = editPlot.id;
+        nameInput.value = editPlot.name;
+        clicksInput.value = editPlot.dailyTarget || 1;
+        daysInput.value = editPlot.targetDays || 7;
+        state.selectedPlantSpecies = editPlot.species || 'strawberry';
+        deleteBtn.classList.remove('hidden');
+        saveBtn.textContent = '💾 Lưu thay đổi';
+      } else {
+        title.innerHTML = '<span>🌱</span> Gieo Hạt Giống Mới';
+        editIdInput.value = '';
+        nameInput.value = '';
+        clicksInput.value = 1;
+        daysInput.value = 7;
+        state.selectedPlantSpecies = 'strawberry';
+        deleteBtn.classList.add('hidden');
+        saveBtn.textContent = '🌱 Gieo hạt ngay';
+      }
+
+      renderSeedSpeciesGrid();
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      setTimeout(() => nameInput.focus(), 60);
+    }
+
+    function closeSeedModal() {
+      const modal = document.getElementById('modal-seed');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Wire up all DOM Event Listeners
+    function bindEvents() {
+      // Navigation Tabs
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      });
+
+      // Sound Toggle
+      document.getElementById('btn-sound-toggle').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById('sound-icon').textContent = soundEnabled ? '🔊' : '🔇';
+        if (soundEnabled) playWaterSplashSound();
+      });
+
+      // Test Day Simulator (+1 Day & Reset)
+      const btnNextDay = document.getElementById('btn-next-day');
+      const btnResetDay = document.getElementById('btn-reset-day');
+      btnNextDay.addEventListener('click', () => {
+        simulatedDayOffset += 1;
+        btnResetDay.classList.remove('hidden');
+        const newToday = getTodayISO();
+        state.selectedCalendarDate = newToday;
+        const dObj = getCurrentDateObj();
+        state.calendarMonth = dObj.getMonth();
+        state.calendarYear = dObj.getFullYear();
+        renderAll();
+        showToast(`⏭ Đã chuyển sang ngày ${formatDateVN(newToday)} (+${simulatedDayOffset} ngày)`, 'info');
+      });
+
+      btnResetDay.addEventListener('click', () => {
+        simulatedDayOffset = 0;
+        btnResetDay.classList.add('hidden');
+        const realToday = getTodayISO();
+        state.selectedCalendarDate = realToday;
+        const dObj = getCurrentDateObj();
+        state.calendarMonth = dObj.getMonth();
+        state.calendarYear = dObj.getFullYear();
+        renderAll();
+        showToast('↺ Đã quay về ngày thực tế hôm nay!', 'info');
+      });
+
+      // Farm Grid Event Delegation (Single-Click to Water, Undo -1, Edit, Harvest, Replant, Add Card)
+      document.getElementById('farm-plots-grid').addEventListener('click', (e) => {
+        const addCard = e.target.closest('#btn-plot-add-card');
+        if (addCard) {
+          openSeedModal(null);
+          return;
+        }
+
+        const actionBtn = e.target.closest('[data-action]');
+        if (actionBtn) {
+          e.stopPropagation();
+          const action = actionBtn.dataset.action;
+          const id = actionBtn.dataset.id;
+          if (action === 'undo') handleUndoClick(id);
+          else if (action === 'edit') {
+            const plot = state.plots.find((p) => p.id === id);
+            if (plot) openSeedModal(plot);
+          } else if (action === 'harvest') {
+            handleHarvestPlot(id);
+          } else if (action === 'replant-dead') {
+            const plot = state.plots.find((p) => p.id === id);
+            if (plot) handleReplantHabit(plot.name, plot.species, plot.dailyTarget, plot.targetDays, plot.id);
+          } else if (action === 'clean-dead') {
+            showCustomConfirm({
+              icon: '🧹',
+              title: 'Dọn ô đất cây héo?',
+              message: 'Bạn muốn dọn sạch cây đã chết để giải phóng ô đất này nhé?',
+              onConfirm: () => handleDeletePlot(id)
+            });
+          }
+          return;
+        }
+
+        // Otherwise, single-click anywhere on the farm plot card waters the plant (+1)!
+        const plotCard = e.target.closest('[data-plot-card]');
+        if (plotCard) {
+          const plotId = plotCard.dataset.plotCard;
+          handleWaterPlotClick(plotId, e.clientX, e.clientY);
+        }
+      });
+
+      // Open New Seed Modal Button
+      document.getElementById('btn-open-new-seed').addEventListener('click', () => openSeedModal(null));
+      document.getElementById('btn-close-seed-modal').addEventListener('click', closeSeedModal);
+      document.getElementById('btn-cancel-seed').addEventListener('click', closeSeedModal);
+
+      // Seed Modal Preset Habits & Quick Pickers
+      document.querySelectorAll('.preset-habit').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.getElementById('input-habit-name').value = btn.dataset.name;
+          document.getElementById('input-daily-target').value = btn.dataset.clicks;
+          state.selectedPlantSpecies = btn.dataset.plant;
+          renderSeedSpeciesGrid();
+        });
+      });
+
+      document.getElementById('seed-species-grid').addEventListener('click', (e) => {
+        const spBtn = e.target.closest('[data-select-species]');
+        if (spBtn) {
+          state.selectedPlantSpecies = spBtn.dataset.selectSpecies;
+          renderSeedSpeciesGrid();
+        }
+      });
+
+      document.querySelectorAll('.quick-clicks').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.getElementById('input-daily-target').value = btn.dataset.val;
+        });
+      });
+
+      document.querySelectorAll('.quick-days').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          document.getElementById('input-target-days').value = btn.dataset.val;
+        });
+      });
+
+      // Save New or Edited Plant Seed Form
+      document.getElementById('form-seed').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const editId = document.getElementById('seed-edit-id').value;
+        const name = document.getElementById('input-habit-name').value.trim();
+        const dailyTarget = Math.max(1, Math.min(10, Number(document.getElementById('input-daily-target').value || 1)));
+        const targetDays = Math.max(3, Math.min(120, Number(document.getElementById('input-target-days').value || 7)));
+        const species = state.selectedPlantSpecies;
+
+        if (!name) return;
+        closeSeedModal();
+        playWaterSplashSound();
+
+        if (editId) {
+          const existing = state.plots.find((p) => p.id === editId);
+          if (existing) {
+            existing.name = name;
+            existing.species = species;
+            existing.dailyTarget = dailyTarget;
+            existing.targetDays = targetDays;
+          }
+          renderAll();
+          showToast(`💾 Đã cập nhật "${name}"!`, 'success');
+          await persistFarmState();
+        } else {
+          const today = getTodayISO();
+          const newPlot = {
+            id: 'plot-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+            name,
+            species,
+            dailyTarget,
+            targetDays,
+            growthDays: 0,
+            plantedDate: today,
+            lastCompletedDate: null,
+            clicksByDate: {},
+            createdAt: Date.now()
+          };
+
+          state.plots.push(newPlot);
+          renderAll();
+          showToast(`🌱 Đã gieo hạt "${name}" (${dailyTarget} lần/ngày)!`, 'success');
+          await persistFarmState();
+        }
+      });
+
+      // Delete Plot inside Edit Modal
+      document.getElementById('btn-delete-plot').addEventListener('click', () => {
+        const editId = document.getElementById('seed-edit-id').value;
+        if (!editId) return;
+        closeSeedModal();
+        showCustomConfirm({
+          icon: '🗑️',
+          title: 'Xóa ô cây này?',
+          message: 'Tiến độ hiện tại của cây này trong vườn sẽ bị xóa. Bạn chắc chắn chứ?',
+          onConfirm: () => handleDeletePlot(editId)
+        });
+      });
+
+      // Harvest Barn Filter & Replant
+      document.getElementById('barn-filter-bar').addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-barn-filter]');
+        if (btn) {
+          state.barnFilter = btn.dataset.barnFilter;
+          renderBarnView();
+        }
+      });
+
+      document.getElementById('barn-harvest-grid').addEventListener('click', (e) => {
+        const replantBtn = e.target.closest('[data-replant-harvest]');
+        if (replantBtn) {
+          const item = state.harvests.find((h) => h.id === replantBtn.dataset.replantHarvest);
+          if (item) {
+            handleReplantHabit(item.name, item.species, item.dailyTarget, item.targetDays);
+          }
+        }
+      });
+
+      // Calendar Navigation & Day Click
+      document.getElementById('btn-prev-month').addEventListener('click', () => {
+        state.calendarMonth -= 1;
+        if (state.calendarMonth < 0) {
+          state.calendarMonth = 11;
+          state.calendarYear -= 1;
+        }
+        renderCalendarView(getTodayISO());
+      });
+
+      document.getElementById('btn-next-month').addEventListener('click', () => {
+        state.calendarMonth += 1;
+        if (state.calendarMonth > 11) {
+          state.calendarMonth = 0;
+          state.calendarYear += 1;
+        }
+        renderCalendarView(getTodayISO());
+      });
+
+      document.getElementById('btn-today-month').addEventListener('click', () => {
+        const todayObj = getCurrentDateObj();
+        state.calendarMonth = todayObj.getMonth();
+        state.calendarYear = todayObj.getFullYear();
+        state.selectedCalendarDate = getTodayISO();
+        renderCalendarView(getTodayISO());
+      });
+
+      document.getElementById('calendar-days-grid').addEventListener('click', (e) => {
+        const dayBtn = e.target.closest('[data-cal-date]');
+        if (dayBtn) {
+          state.selectedCalendarDate = dayBtn.dataset.calDate;
+          renderCalendarView(getTodayISO());
+        }
+      });
+
+      // Account Sync Modal Open/Close
+      const accountModal = document.getElementById('modal-account');
+      document.getElementById('btn-open-account').addEventListener('click', () => {
+        showAuthModalError('');
+        accountModal.classList.remove('hidden');
+        accountModal.classList.add('flex');
+      });
+      document.getElementById('btn-close-account-modal').addEventListener('click', () => {
+        accountModal.classList.add('hidden');
+        accountModal.classList.remove('flex');
+      });
+
+      // Copy UID using execCommand('copy')
+      document.getElementById('btn-copy-uid').addEventListener('click', () => {
+        const uidText = document.getElementById('modal-user-uid').textContent;
+        const tempInput = document.createElement('textarea');
+        tempInput.value = uidText;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        try {
+          document.execCommand('copy');
+          showToast('📋 Đã sao chép mã nông dân!', 'success');
+        } catch (err) {
+          showToast('Không thể sao chép mã.', 'error');
+        }
+        document.body.removeChild(tempInput);
+      });
+
+      // Google Sign-In for Cross-Device Sync
+      document.getElementById('btn-google-signin').addEventListener('click', async () => {
+        showAuthModalError('');
+        if (!auth) {
+          showToast('Tính năng đăng nhập đám mây chưa sẵn sàng.', 'warning');
+          return;
+        }
+        const provider = new GoogleAuthProvider();
+        try {
+          await signInWithPopup(auth, provider);
+          showToast('☁️ Đăng nhập Google thành công! Đang đồng bộ vườn...', 'success');
+          accountModal.classList.add('hidden');
+          accountModal.classList.remove('flex');
+        } catch (err) {
+          console.error('Google sign-in error:', err);
+          const friendlyMsg = mapFirebaseErrorVietnamese(err);
+          showAuthModalError(friendlyMsg);
+          showToast(friendlyMsg, 'error');
+        }
+      });
+
+      // Email / Password Sign-In & Register
+      let emailAuthMode = 'login';
+      document.querySelectorAll('#form-email-auth button[type="submit"]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          emailAuthMode = btn.dataset.mode;
+        });
+      });
+
+      document.getElementById('form-email-auth').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showAuthModalError('');
+        if (!auth) return;
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password').value;
+
+        try {
+          if (emailAuthMode === 'register') {
+            await createUserWithEmailAndPassword(auth, email, password);
+            showToast('🎉 Tạo tài khoản mới thành công! Đang đồng bộ...', 'success');
+          } else {
+            await signInWithEmailAndPassword(auth, email, password);
+            showToast('☁️ Đăng nhập thành công! Đang đồng bộ...', 'success');
+          }
+          accountModal.classList.add('hidden');
+          accountModal.classList.remove('flex');
+        } catch (err) {
+          console.error('Email auth error:', err);
+          const friendlyMsg = mapFirebaseErrorVietnamese(err);
+          showAuthModalError(friendlyMsg);
+          showToast(friendlyMsg, 'error');
+        }
+      });
+
+      // Sign Out
+      document.getElementById('btn-signout').addEventListener('click', async () => {
+        if (!auth) return;
+        try {
+          detachListeners();
+          await signOut(auth);
+          showToast('Đã đăng xuất và chuyển về chế độ lưu cục bộ.', 'info');
+        } catch (err) {
+          console.error('Sign out error:', err);
+        }
+      });
+    }
+
+    // Boot Application
+    window.addEventListener('DOMContentLoaded', () => {
+      bindEvents();
+      renderAll();
+      initFirebase();
+    });
+  </script>
+</body>
+</html>
